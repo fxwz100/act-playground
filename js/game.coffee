@@ -64,7 +64,7 @@ class Player
     # properties and states
     @props =
       hp: 10
-      mp: 100
+      mp: 20
       sp: 10
       ht: 500
       at: 10
@@ -326,7 +326,7 @@ game = new Phaser.Game 800, 600, Phaser.AUTO, 'action',
         , null, @
 
         @physics.arcade.overlap weapon, stars, (weapon, star) ->
-          unless weapon.animations.currentAnim.isFinished
+          if weapon.animations.currentAnim.isPlaying
             star.kill()
         , null, @
 
