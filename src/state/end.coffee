@@ -2,6 +2,10 @@ module.exports =
 
 class OverState
 
+  name: 'over'
+
+  constructor: ({@next_state}) ->
+
   init: (@character) ->
 
   preload: ->

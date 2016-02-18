@@ -29,7 +29,7 @@ module.exports = class Player
       hp: 10
       mp: 20
       sp: 10
-      ht: 500
+      ht: 400
       at: 10
 
     @state =

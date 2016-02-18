@@ -44,21 +44,129 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var OverState, StarPlayState, WelcomeState, game;
+	var Narrator, OverState, StarPlayState, WelcomeState, add, game;
 
 	StarPlayState = __webpack_require__(1);
 
-	WelcomeState = __webpack_require__(4);
+	WelcomeState = __webpack_require__(7);
 
-	OverState = __webpack_require__(5);
+	OverState = __webpack_require__(8);
+
+	Narrator = __webpack_require__(6);
 
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'action');
 
-	game.state.add('welcome', new WelcomeState, true);
+	add = function(s, autoplay) {
+	  if (autoplay == null) {
+	    autoplay = false;
+	  }
+	  return game.state.add(s.name, s, autoplay);
+	};
 
-	game.state.add('play', new StarPlayState);
+	game.state.add('start', new WelcomeState({
+	  next_state: 'dialog'
+	}), true);
 
-	game.state.add('over', new OverState);
+	game.state.add('play', new StarPlayState({
+	  next_state: 'end'
+	}));
+
+	game.state.add('end', new OverState({
+	  next_state: 'start'
+	}));
+
+	game.state.add('dialog', new Narrator({
+	  scripts: [
+	    {
+	      description: {
+	        text: '我是一个平凡的人。'
+	      }
+	    }, {
+	      description: {
+	        text: '可能平凡得不能再平凡了。'
+	      }
+	    }, {
+	      description: {
+	        text: '但是我有一个梦想。'
+	      }
+	    }, {
+	      description: {
+	        text: '梦想有一天，'
+	      }
+	    }, {
+	      description: {
+	        text: '我能做出一个游戏。'
+	      }
+	    }, {
+	      description: {
+	        text: '我从未动摇。'
+	      }
+	    }, {
+	      description: {
+	        text: '直到有一天，'
+	      }
+	    }, {
+	      description: {
+	        text: '她出现了。'
+	      }
+	    }, {
+	      image: {
+	        name: 'girl',
+	        url: 'assets/girl.jpg'
+	      }
+	    }, {
+	      description: {
+	        text: '她告诉我：'
+	      }
+	    }, {
+	      description: {
+	        text: '「你该找工作了，\n否则我将离你而去！」'
+	      }
+	    }, {
+	      image: {
+	        name: ''
+	      },
+	      description: {
+	        text: '但我除了游戏以外，'
+	      }
+	    }, {
+	      description: {
+	        text: '一无是处。'
+	      }
+	    }, {
+	      description: {
+	        text: '我放弃了。'
+	      }
+	    }, {
+	      description: {
+	        text: '所有人离我而去。'
+	      }
+	    }, {
+	      description: {
+	        text: '我孤独地回到家，'
+	      }
+	    }, {
+	      description: {
+	        text: '沉浸在我的游戏中……'
+	      }
+	    }, {
+	      description: {
+	        text: '当我醒来时……'
+	      }
+	    }, {
+	      image: {
+	        name: 'welcome-bg',
+	        url: 'assets/welcome-bg.png'
+	      }
+	    }, {
+	      description: {
+	        text: '这是什么？！',
+	        y: 450
+	      }
+	    }
+	  ],
+	  next_state: 'play'
+	}));
 
 
 /***/ },
@@ -91,7 +199,11 @@
 	};
 
 	module.exports = StarPlayState = (function() {
-	  function StarPlayState() {}
+	  StarPlayState.prototype.name = 'starplay';
+
+	  function StarPlayState(arg) {
+	    this.next_state = arg.next_state;
+	  }
 
 	  StarPlayState.prototype.preload = function() {
 	    this.load.image('game-background', 'assets/game-bg.png');
@@ -103,7 +215,7 @@
 	  };
 
 	  StarPlayState.prototype.create = function() {
-	    var ground, i, j, k, platforms, player, roadlight, roadlights, star, star_scale, star_x, star_y, stars;
+	    var ground, i, j, k, platforms, player, roadlight, roadlight_x, roadlight_y, roadlights, star, star_scale, star_x, star_y, stars;
 	    this.physics.startSystem(Phaser.Physics.ARCADE);
 	    this.character = {};
 	    this.add.sprite(0, 0, 'game-background');
@@ -115,9 +227,12 @@
 	    roadlights = this.character.roadlights = this.add.group();
 	    roadlights.enableBody = true;
 	    for (i = j = 0; j <= 2; i = ++j) {
-	      roadlight = roadlights.create(100 + i * 300, this.world.height - 64, 'road-light');
+	      roadlight_x = 100 + i * 300;
+	      roadlight_y = this.world.height - 64;
+	      roadlight = roadlights.create(roadlight_x, roadlight_y, 'road-light');
 	      roadlight.anchor.setTo(0.5, 1);
 	      roadlight.body.immovable = true;
+	      roadlight.bounds;
 	    }
 	    player = new Player(this);
 	    this.character.player = player.sprite;
@@ -138,7 +253,12 @@
 	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
 	    this.physics.arcade.collide(player, platforms);
 	    this.physics.arcade.collide(stars, platforms);
-	    this.physics.arcade.collide(stars, roadlights);
+	    this.physics.arcade.overlap(stars, stars, function(star1, star2) {
+	      if (star1 !== star2) {
+	        star1.kill();
+	        return star2.kill();
+	      }
+	    });
 	    fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
 	      star.agent.fight(player.agent);
 	      return player.agent.fight(star.agent);
@@ -184,7 +304,7 @@
 	    if (player.agent.props.hp < 0) {
 	      player.agent.kill((function(_this) {
 	        return function() {
-	          return _this.state.start('over', false, false, _this.character);
+	          return _this.state.start(_this.next_state, false, false, _this.character);
 	        };
 	      })(this));
 	    }
@@ -223,7 +343,7 @@
 	      hp: 10,
 	      mp: 20,
 	      sp: 10,
-	      ht: 500,
+	      ht: 400,
 	      at: 10
 	    };
 	    this.state = {
@@ -411,13 +531,126 @@
 
 
 /***/ },
-/* 4 */
+/* 4 */,
+/* 5 */,
+/* 6 */
 /***/ function(module, exports) {
 
-	var WelcomeState;
+	var NarratorState;
+
+	module.exports = NarratorState = (function() {
+	  NarratorState.prototype.name = 'narrator';
+
+	  function NarratorState(arg) {
+	    this.scripts = arg.scripts, this.next_state = arg.next_state;
+	  }
+
+	  NarratorState.prototype.preload = function() {
+	    var i, len, ref, results, script;
+	    ref = this.scripts;
+	    results = [];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      script = ref[i];
+	      if (script.image) {
+	        results.push(this.load.image(script.image.name, script.image.url));
+	      } else {
+	        results.push(void 0);
+	      }
+	    }
+	    return results;
+	  };
+
+	  NarratorState.prototype.create = function() {
+	    var current_script, ref, ref1, screen_in, text_in, text_x, text_y;
+	    this.index = 0;
+	    if (this.scripts.length > 0) {
+	      current_script = this.scripts[this.index];
+	      this.screen = this.add.button(0, 0, (ref = current_script.image) != null ? ref.name : void 0, function() {
+	        var script;
+	        if (!this.text_fade.isRunning) {
+	          this.index += 1;
+	          if (this.index < this.scripts.length) {
+	            script = this.scripts[this.index];
+	            if (script.image) {
+	              this.screen_fade.start();
+	            }
+	            return this.text_fade.start();
+	          } else {
+	            this.add.tween(this.screen).to({
+	              alpha: 0
+	            }, 500).start().onComplete.add((function(_this) {
+	              return function() {
+	                return _this.state.start(_this.next_state);
+	              };
+	            })(this));
+	            return this.add.tween(this.text).to({
+	              alpha: 0
+	            }, 500).start();
+	          }
+	        }
+	      }, this);
+	      this.screen.alpha = 0;
+	      this.screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600);
+	      text_x = this.world.centerX;
+	      text_y = this.world.centerY;
+	      this.text = this.add.text(text_x, text_y, (ref1 = current_script.description) != null ? ref1.text : void 0, {
+	        fontSize: '36pt',
+	        fill: '#fff'
+	      });
+	      this.text.anchor.setTo(0.5, 0.5);
+	      this.text.alpha = 0;
+	      screen_in = this.add.tween(this.screen).to({
+	        alpha: 1
+	      }, 500).start();
+	      this.screen_fade = this.add.tween(this.screen).to({
+	        alpha: 0
+	      }, 500).chain(screen_in);
+	      this.screen_fade.onComplete.add(function() {
+	        if (this.index < this.scripts.length) {
+	          return this.screen.loadTexture(this.scripts[this.index].image.name);
+	        }
+	      }, this);
+	      text_in = this.add.tween(this.text).to({
+	        alpha: 1
+	      }, 500).start();
+	      this.text_fade = this.add.tween(this.text).to({
+	        alpha: 0
+	      }, 500).chain(text_in);
+	      return this.text_fade.onComplete.add(function() {
+	        var script;
+	        script = this.scripts[this.index];
+	        if (script.description) {
+	          this.text.text = script.description.text;
+	          this.text.x = script.description.x || this.world.centerX;
+	          return this.text.y = script.description.y || this.world.centerY;
+	        } else {
+	          return this.text.text = '';
+	        }
+	      }, this);
+	    } else {
+	      return this.state.start(this.next_state);
+	    }
+	  };
+
+	  return NarratorState;
+
+	})();
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var StarPlayState, WelcomeState;
+
+	StarPlayState = __webpack_require__(1);
 
 	module.exports = WelcomeState = (function() {
-	  function WelcomeState() {}
+	  WelcomeState.prototype.name = 'welcome';
+
+	  function WelcomeState(arg) {
+	    this.next_state = arg.next_state;
+	  }
 
 	  WelcomeState.prototype.preload = function() {
 	    this.load.spritesheet('start-btn', 'assets/start-btn.png', 120, 35);
@@ -433,7 +666,7 @@
 	      alpha: 0
 	    }).start();
 	    start_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'start-btn', function() {
-	      return this.state.start('play');
+	      return this.state.start(this.next_state);
 	    }, this, 1, 0);
 	    start_btn.anchor.setTo(0.5, 0.5);
 	    start_btn.alpha = 0;
@@ -463,13 +696,17 @@
 
 
 /***/ },
-/* 5 */
+/* 8 */
 /***/ function(module, exports) {
 
 	var OverState;
 
 	module.exports = OverState = (function() {
-	  function OverState() {}
+	  OverState.prototype.name = 'over';
+
+	  function OverState(arg) {
+	    this.next_state = arg.next_state;
+	  }
 
 	  OverState.prototype.init = function(character) {
 	    this.character = character;

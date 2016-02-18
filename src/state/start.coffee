@@ -1,6 +1,10 @@
-module.exports =
+StarPlayState = require './starplay'
 
-class WelcomeState
+module.exports = class WelcomeState
+
+  name: 'welcome'
+
+  constructor: ({@next_state}) ->
 
   preload: ->
     @load.spritesheet 'start-btn', 'assets/start-btn.png', 120, 35
@@ -16,7 +20,7 @@ class WelcomeState
 
     # add button
     start_btn = @add.button @world.centerX, @world.centerY + 100, 'start-btn', ->
-      @state.start 'play'
+      @state.start @next_state
     , @, 1, 0
     start_btn.anchor.setTo 0.5, 0.5
     start_btn.alpha = 0

@@ -19,6 +19,10 @@ context =
 
 module.exports = class StarPlayState
 
+  name: 'starplay'
+
+  constructor: ({@next_state}) ->
+
   preload: ->
     @load.image 'game-background', 'assets/game-bg.png'
     @load.image 'ground', 'assets/ground.png'
@@ -47,9 +51,12 @@ module.exports = class StarPlayState
     roadlights.enableBody = yes
 
     for i in [0..2]
-      roadlight = roadlights.create 100 + i * 300, @world.height - 64, 'road-light'
+      roadlight_x = 100 + i * 300
+      roadlight_y = @world.height - 64
+      roadlight = roadlights.create roadlight_x, roadlight_y, 'road-light'
       roadlight.anchor.setTo 0.5, 1
       roadlight.body.immovable = yes
+      roadlight.bounds
 
     # create the characters
 
@@ -76,7 +83,11 @@ module.exports = class StarPlayState
 
     @physics.arcade.collide player, platforms
     @physics.arcade.collide stars, platforms
-    @physics.arcade.collide stars, roadlights
+
+    @physics.arcade.overlap stars, stars, (star1, star2) ->
+      if star1 isnt star2
+        star1.kill()
+        star2.kill()
 
     fighting = @physics.arcade.overlap player, stars, (player, star) ->
       star.agent.fight player.agent
@@ -84,7 +95,6 @@ module.exports = class StarPlayState
     , null, @
 
     lighted = @game.physics.arcade.overlap player, roadlights
-
 
     for star in stars.children
       unless star.body.allowGravity = not lighted
@@ -119,6 +129,6 @@ module.exports = class StarPlayState
 
     if player.agent.props.hp < 0
       player.agent.kill =>
-        @state.start 'over', no, no, @character
+        @state.start @next_state, no, no, @character
 
     stars.enableBody = player.x > 30
