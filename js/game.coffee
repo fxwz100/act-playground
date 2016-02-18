@@ -87,9 +87,6 @@ class Player
     @weapon.x = @sprite.x
     @weapon.y = @sprite.y
 
-    if @props.hp < 0
-      context.state = 'over'
-
   # - actions --------------------------
 
   walkLeft: ->
@@ -151,7 +148,7 @@ class Player
         @game.add.tween(msg).to y: msg.y-100, alpha: 0, 1000, 'Linear', on
         .onComplete.add msg.kill, msg
 
-  kill: ->
+  kill: (cb) ->
     @stop()
     @still()
 
@@ -159,10 +156,13 @@ class Player
 
     if @sprite.frame > 4
       @game.add.tween @sprite
-      .to angle: -90, 200, 'Linear', on
+      .to angle: -90, 200, Phaser.Easing.Bounce.Out, on
     else
       @game.add.tween @sprite
-      .to angle: 90, 200, 'Linear', on
+      .to angle: 90, 200, Phaser.Easing.Bounce.Out, on
+
+    if cb
+      setTimeout cb, 500
 
 
 class Enemy
@@ -237,37 +237,8 @@ class Enemy
     @sprite.kill()
 
 
-GameOverScene =
-  show: (game) ->
-    # add overlay
-    @overlay = game.add.graphics 0, 0
-    @overlay.beginFill '#000', 1
-    @overlay.drawRect 0, 0, 800, 600
-    @overlay.endFill()
-    @overlay.alpha = 0.7
+class PlayState
 
-    game.add.tween @overlay
-    .from alpha: 0
-    .start()
-
-    # add text
-    text_x = game.world.width / 2
-    text_y = game.world.height / 2
-    @text = game.add.text text_x, text_y, '胜负乃兵家常事，大侠重新来过吧！',
-      fontSize: '32px'
-      fill: '#fff'
-    @text.anchor.setTo 0.5, 0.5
-
-    game.add.tween @text
-    .from alpha: 0
-    .start()
-
-  hide: ->
-    @overlay.kill()
-    @text.kill()
-
-
-game = new Phaser.Game 800, 600, Phaser.AUTO, 'action',
   preload: ->
     @load.image 'sky', 'assets/sky.png'
     @load.image 'ground', 'assets/platform.png'
@@ -278,11 +249,13 @@ game = new Phaser.Game 800, 600, Phaser.AUTO, 'action',
   create: ->
     @physics.startSystem Phaser.Physics.ARCADE
 
+    @character = {}
+
     # create the characters
 
     @add.sprite 0, 0, 'sky'
 
-    platforms = character.platforms = @add.group()
+    platforms = @character.platforms = @add.group()
     platforms.enableBody = on
 
     ground = platforms.create 0, @world.height - 64, 'ground'
@@ -295,11 +268,13 @@ game = new Phaser.Game 800, 600, Phaser.AUTO, 'action',
     ledge = platforms.create -150, 250, 'ground'
     ledge.body.immovable = on
 
-    player = new Player @
-    character.player = player.sprite
-    character.weapon = player.weapon
+    # create the characters
 
-    stars = character.stars = @add.group()
+    player = new Player @
+    @character.player = player.sprite
+    @character.weapon = player.weapon
+
+    stars = @character.stars = @add.group()
     stars.enableBody = on
 
     for i in [0..12]
@@ -309,75 +284,167 @@ game = new Phaser.Game 800, 600, Phaser.AUTO, 'action',
 
     context.playerStatus.init @, player
 
-    context.cursors = @input.keyboard.createCursorKeys()
+    @cursors = @input.keyboard.createCursorKeys()
 
   update: ->
-    {cursors} = context
-    {player, weapon, stars, platforms} = character
+    {player, weapon, stars, platforms} = @character
 
     @physics.arcade.collide player, platforms
     @physics.arcade.collide stars, platforms
 
-    switch context.state
-      when 'play'
-        fighting = @physics.arcade.overlap player, stars, (player, star) ->
-          star.agent.fight player.agent
-          player.agent.fight star.agent
-        , null, @
+    fighting = @physics.arcade.overlap player, stars, (player, star) ->
+      star.agent.fight player.agent
+      player.agent.fight star.agent
+    , null, @
 
-        @physics.arcade.overlap weapon, stars, (weapon, star) ->
-          if weapon.animations.currentAnim.isPlaying
-            star.kill()
-        , null, @
+    @physics.arcade.overlap weapon, stars, (weapon, star) ->
+      if weapon.animations.currentAnim.isPlaying
+        star.kill()
+    , null, @
 
-        context.playerStatus.update player.agent
+    context.playerStatus.update player.agent
 
-        player.agent.stop()
+    player.agent.stop()
 
-        # detect left/right moving.
-        switch
-          when cursors.left.isDown
-            player.agent.walkLeft()
-          when cursors.right.isDown
-            player.agent.walkRight()
-          when not fighting
-            player.agent.still()
+    # detect left/right moving.
+    switch
+      when @cursors.left.isDown
+        player.agent.walkLeft()
+      when @cursors.right.isDown
+        player.agent.walkRight()
+      when not fighting
+        player.agent.still()
 
-        if cursors.up.isDown
-          player.agent.chop()
+    if @cursors.up.isDown
+      player.agent.chop()
 
-        if cursors.down.isDown
-          player.agent.cutoff()
+    if @cursors.down.isDown
+      player.agent.cutoff()
 
-        # track jumping
-        if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
-          player.agent.jump()
+    # track jumping
+    if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+      player.agent.jump()
 
-        player.agent.update()
-        for star in stars.children
-          star.agent.update()
+    player.agent.update()
+    for star in stars.children
+      star.agent.update()
 
-      when 'over'
-        player.agent.kill()
+    if player.agent.props.hp < 0
+      player.agent.kill =>
+        @state.start 'over', no, no, @character
 
-        context.state = 'over-text'
+class WelcomeState
 
-      when 'over-text'
-        GameOverScene.show @
+  preload: ->
+    @load.spritesheet 'start-btn', 'assets/start-btn.png', 215, 72
+    @load.spritesheet 'about-btn', 'assets/about-btn.png', 215, 72
+    @load.image 'about-board', 'assets/about-board.png'
+    @load.image 'sky', 'assets/sky.png'
 
-        context.state = 'end'
+  create: ->
+    @add.sprite 0, 0, 'sky'
 
-      when 'end'
-        if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
-          GameOverScene.hide()
+    # add text
+    text_x = @world.centerX
+    text_y = @world.centerY - 50
+    text = @add.text text_x, text_y, '第九行动',
+      fontSize: '50px'
+      fill: '#fff'
+    text.anchor.setTo 0.5, 0.5
 
-          stars.removeAll()
-          for i in [0..12]
-            star = new Enemy @, stars, i * 70, 0
+    @add.tween text
+    .from alpha: 0, fontSize: '30px', 1000, Phaser.Easing.Bounce.Out
+    .start()
 
-          player.agent.reset()
+    # add button
+    start_btn = @add.button @world.centerX, @world.centerY + 25, 'start-btn', ->
+      @state.start 'play'
+    , @, 1, 0
+    start_btn.scale.setTo 0.7
+    start_btn.anchor.setTo 0.5, 0.5
 
-          context.playerStatus.update player.agent
+    @add.tween start_btn
+    .from alpha: 0
+    .start()
 
-          context.state = 'play'
+    @add.tween start_btn
+    .to alpha: 1, 1000, 'Linear', on, 2000, -1, on
 
+    # add button
+    about_btn = @add.button @world.centerX, @world.centerY + 100, 'about-btn', ->
+      @add.tween about_board
+      .to y: @world.centerY, 1000, Phaser.Easing.Bounce.Out
+      .start()
+    , @, 1, 0
+    about_btn.scale.setTo 0.7
+    about_btn.anchor.setTo 0.5, 0.5
+
+    @add.tween about_btn
+    .from alpha: 0
+    .start()
+
+    about_board = @add.button @world.centerX, -1000, 'about-board', ->
+      @add.tween about_board
+      .to y: -1000
+      .start()
+    , @
+    about_board.anchor.setTo 0.5, 0.5
+
+
+class OverState
+
+  init: (@character) ->
+    console.log @character
+
+  preload: ->
+    @load.spritesheet 'restart-btn', 'assets/reload-btn.png', 215, 72
+
+  create: ->
+    # add overlay
+    @overlay = @add.graphics 0, 0
+    @overlay.beginFill '#000', 1
+    @overlay.drawRect 0, 0, 800, 600
+    @overlay.endFill()
+    @overlay.alpha = 0.7
+
+    @add.tween @overlay
+    .from alpha: 0
+    .start()
+
+    # add text
+    text_x = @world.centerX
+    text_y = @world.centerY - 25
+    @text = @add.text text_x, text_y, '胜负乃兵家常事，大侠重新来过吧！',
+      fontSize: '32px'
+      fill: '#fff'
+    @text.anchor.setTo 0.5, 0.5
+
+    @add.tween @text
+    .from alpha: 0
+    .start()
+
+    # add button
+    restart_btn = @add.button @world.centerX, @world.centerY + 50, 'restart-btn', =>
+      @state.start 'play'
+    , @, 1, 0
+    restart_btn.anchor.setTo 0.5, 0.5
+
+    @add.tween restart_btn
+    .from alpha: 0
+    .start()
+    @add.tween restart_btn.scale
+    .from x: 2, y: 2, 1000, Phaser.Easing.Bounce.Out
+    .start()
+
+  update: ->
+    if @character
+      {player, weapon, stars, platforms} = @character
+
+      @physics.arcade.collide player, platforms
+      @physics.arcade.collide stars, platforms
+
+
+game = new Phaser.Game 800, 600, Phaser.AUTO, 'action'
+game.state.add 'welcome', new WelcomeState, on
+game.state.add 'play', new PlayState
+game.state.add 'over', new OverState
