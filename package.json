@@ -1,0 +1,21 @@
+{
+  "name": "action9",
+  "version": "1.0.0",
+  "description": "An action game.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yfwz100/act-playground.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "yfwz100",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yfwz100/act-playground/issues"
+  },
+  "homepage": "https://github.com/yfwz100/act-playground#readme"
+}
