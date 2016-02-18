@@ -362,13 +362,18 @@ class WelcomeState
     , @, 1, 0
     start_btn.scale.setTo 0.7
     start_btn.anchor.setTo 0.5, 0.5
+    start_btn.alpha = 0
 
     @add.tween start_btn
-    .from alpha: 0
+    .to alpha: 1, 1000, Phaser.Easing.Bounce.Out
+    .chain(@add.tween start_btn
+    .delay 1000
+    .from alpha: 0.5
+    .to alpha: 1
+    .repeat -1
+    .yoyo on
+    .yoyoDelay 500)
     .start()
-
-    @add.tween start_btn
-    .to alpha: 1, 1000, 'Linear', on, 2000, -1, on
 
     # add button
     about_btn = @add.button @world.centerX, @world.centerY + 100, 'about-btn', ->
