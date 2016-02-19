@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Narrator, OverState, StarPlayState, WelcomeState, add, game;
+	var Narrator, OverState, StarPlayState, WelcomeState, game;
 
 	StarPlayState = __webpack_require__(1);
 
@@ -56,16 +56,20 @@
 
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'action');
 
-	add = function(s, autoplay) {
-	  if (autoplay == null) {
-	    autoplay = false;
+	game.state.add('adapt', {
+	  create: function() {
+	    this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+	    this.scale.pageAlignHorizontally = true;
+	    this.scale.pageAlignVertically = true;
+	    this.scale.setScreenSize = true;
+	    this.scale.aspectRatio = 4 / 3;
+	    return this.state.start('start');
 	  }
-	  return game.state.add(s.name, s, autoplay);
-	};
+	}, true);
 
 	game.state.add('start', new WelcomeState({
 	  next_state: 'init'
-	}), true);
+	}));
 
 	game.state.add('init', new Narrator({
 	  scripts: [

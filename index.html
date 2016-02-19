@@ -3,23 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <title>Action 9 - Powered by Phaser.io</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="screen-orientation" content="landscape">
+<!--  <meta name ="viewport" content ="initial-scale=1, maximum-scale=3, minimum-scale=1, user-scalable=no">-->
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
   <script type="text/javascript" src="//cdn.bootcss.com/phaser/2.4.4/custom/phaser-arcade-physics.js"></script>
   <style type="text/css">
     body {
       background-color: #eee;
       margin: 0;
+      width: 100%;
     }
-    #action {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 800px;
-      height: 600px;
-      margin-left: -400px;
-      margin-top: -300px;
-      box-shadow: 0 0 10px #acacac;
-      border-radius: 10px;
-      overflow: hidden;
+    @media (min-width: 800px) {
+      #action {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 800px;
+        height: 600px;
+        margin-left: -400px;
+        margin-top: -300px;
+        box-shadow: 0 0 10px #acacac;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+    }
+    @media (max-width: 800px) {
+      #action {
+        width: 100%;
+      }
     }
   </style>
 </head>

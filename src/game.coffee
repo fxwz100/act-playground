@@ -5,10 +5,17 @@ Narrator = require './state/narrator'
 
 game = new Phaser.Game 800, 600, Phaser.AUTO, 'action'
 
-add = (s, autoplay=off) ->
-  game.state.add s.name, s, autoplay
+game.state.add 'adapt',
+  create: ->
+    @scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
+    @scale.pageAlignHorizontally = on
+    @scale.pageAlignVertically = on
+    @scale.setScreenSize = on
+    @scale.aspectRatio = 4/3
+    @state.start 'start'
+, on
 
-game.state.add 'start', new WelcomeState(next_state: 'init'), on
+game.state.add 'start', new WelcomeState(next_state: 'init')
 game.state.add 'init', new Narrator
   scripts:[
     {description: text: '我是一个平凡的人。'}
