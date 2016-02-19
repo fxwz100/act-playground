@@ -663,26 +663,32 @@
 	    return results;
 	  };
 
+	  NarratorState.prototype.next_dialog = function() {
+	    var script;
+	    if (!this.text_fade.isRunning) {
+	      this.index += 1;
+	      if (this.index < this.scripts.length) {
+	        script = this.scripts[this.index];
+	        if (script.image) {
+	          this.screen_fade.start();
+	        }
+	        return this.text_fade.start();
+	      } else {
+	        return this.next_scene();
+	      }
+	    }
+	  };
+
 	  NarratorState.prototype.create = function() {
 	    var current_script, ref, ref1, ref2, ref3, screen_in, skip_btn, skip_text, skip_texture, text_in, text_x, text_y;
 	    this.index = 0;
 	    if (this.scripts.length > 0) {
 	      current_script = this.scripts[this.index];
-	      this.screen = this.add.button(0, 0, (ref = current_script.image) != null ? ref.name : void 0, function() {
-	        var script;
-	        if (!this.text_fade.isRunning) {
-	          this.index += 1;
-	          if (this.index < this.scripts.length) {
-	            script = this.scripts[this.index];
-	            if (script.image) {
-	              this.screen_fade.start();
-	            }
-	            return this.text_fade.start();
-	          } else {
-	            return this.next_scene();
-	          }
-	        }
-	      }, this);
+	      this.screen = this.add.button(0, 0, (ref = current_script.image) != null ? ref.name : void 0, (function(_this) {
+	        return function() {
+	          return _this.next_dialog();
+	        };
+	      })(this));
 	      this.screen.alpha = 0;
 	      this.screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600);
 	      screen_in = this.add.tween(this.screen).to({
@@ -739,6 +745,12 @@
 	      }, 1000, 'Linear', true, 0, -1, true);
 	    } else {
 	      return this.state.start(this.next_state);
+	    }
+	  };
+
+	  NarratorState.prototype.update = function() {
+	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	      return this.next_dialog();
 	    }
 	  };
 

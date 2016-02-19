@@ -20,6 +20,19 @@ module.exports = class NarratorState
       if script.image
         @load.image script.image.name, script.image.url
 
+  next_dialog: ->
+    unless @text_fade.isRunning
+      @index += 1
+      if @index < @scripts.length
+        script = @scripts[@index]
+        # image fades if image exists.
+        if script.image
+          @screen_fade.start()
+        # text fade always runs.
+        @text_fade.start()
+      else
+        @next_scene()
+
   create: ->
     @index = 0
 
@@ -27,19 +40,8 @@ module.exports = class NarratorState
       current_script = @scripts[@index]
 
       # create the screen image.
-      @screen = @add.button 0, 0, current_script.image?.name, ->
-        unless @text_fade.isRunning
-          @index += 1
-          if @index < @scripts.length
-            script = @scripts[@index]
-            # image fades if image exists.
-            if script.image
-              @screen_fade.start()
-            # text fade always runs.
-            @text_fade.start()
-          else
-            @next_scene()
-      , @
+      @screen = @add.button 0, 0, current_script.image?.name, =>
+        @next_dialog()
       @screen.alpha = 0
       @screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600)
 
@@ -96,3 +98,7 @@ module.exports = class NarratorState
 
     else
       @state.start @next_state
+
+  update: ->
+    if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+      @next_dialog()
