@@ -851,7 +851,7 @@
 	    }).start();
 	    text_x = this.world.centerX;
 	    text_y = this.world.centerY;
-	    this.text = this.add.text(text_x, text_y, '有事忙故事没编下去，\n   关注 github 的更新吧 😂', {
+	    this.text = this.add.text(text_x, text_y, '未完待续，关注github更新吧 :)', {
 	      fontSize: '32px',
 	      fill: '#fff'
 	    });

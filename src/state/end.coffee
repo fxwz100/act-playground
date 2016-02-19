@@ -27,7 +27,7 @@ class OverState
     # add text
     text_x = @world.centerX
     text_y = @world.centerY
-    @text = @add.text text_x, text_y, '有事忙故事没编下去，\n   关注 github 的更新吧 😂',
+    @text = @add.text text_x, text_y, '未完待续，关注github更新吧 :)',
       fontSize: '32px'
       fill: '#fff'
     @text.anchor.setTo 0.5, 0.5
