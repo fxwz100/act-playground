@@ -43,7 +43,7 @@ module.exports = class WelcomeState
 
     about_board = @add.button @world.centerX, -1000, 'about-board', ->
       @add.tween about_board
-      .to y: -1000
+      .to y: -1000, 1000, Phaser.Easing.Bounce.Out
       .start()
     , @
     about_board.anchor.setTo 0.5, 0.5

@@ -807,7 +807,7 @@
 	    about_board = this.add.button(this.world.centerX, -1000, 'about-board', function() {
 	      return this.add.tween(about_board).to({
 	        y: -1000
-	      }).start();
+	      }, 1000, Phaser.Easing.Bounce.Out).start();
 	    }, this);
 	    return about_board.anchor.setTo(0.5, 0.5);
 	  };
