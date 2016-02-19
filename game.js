@@ -165,10 +165,11 @@
 	}));
 
 	game.state.add('star', new StarPlayState({
-	  next_state: 'star-end'
+	  over_state: 'star-1',
+	  pass_state: 'star-1'
 	}));
 
-	game.state.add('star-end', new Narrator({
+	game.state.add('star-1', new Narrator({
 	  scripts: [
 	    {
 	      description: {
@@ -238,7 +239,7 @@
 	  StarPlayState.prototype.name = 'starplay';
 
 	  function StarPlayState(arg) {
-	    this.next_state = arg.next_state;
+	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
 	  }
 
 	  StarPlayState.prototype.preload = function() {
@@ -351,9 +352,12 @@
 	        }, 1000).start();
 	        player.agent.kill((function(_this) {
 	          return function() {
-	            return _this.state.start(_this.next_state, true, false, _this.character);
+	            return _this.state.start(_this.over_state, true, false, _this.character);
 	          };
 	        })(this));
+	        return this.gameover = true;
+	      } else if (player.x > this.world.width) {
+	        this.state.start(this.pass_state, true, false, this.character);
 	        return this.gameover = true;
 	      }
 	    }

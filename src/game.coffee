@@ -16,6 +16,7 @@ game.state.add 'adapt',
 , on
 
 game.state.add 'start', new WelcomeState(next_state: 'init')
+
 game.state.add 'init', new Narrator
   scripts:[
     {description: text: '我是一个平凡的人。'}
@@ -55,8 +56,12 @@ game.state.add 'init', new Narrator
     }
   ]
   next_state: 'star'
-game.state.add 'star', new StarPlayState(next_state: 'star-end')
-game.state.add 'star-end', new Narrator
+
+game.state.add 'star', new StarPlayState
+  over_state: 'star-1'
+  pass_state: 'star-1'
+
+game.state.add 'star-1', new Narrator
   scripts:[
     {
       description:
@@ -72,4 +77,5 @@ game.state.add 'star-end', new Narrator
     {description: text: '我还要做出一个游戏啊！'}
   ]
   next_state: 'end'
+
 game.state.add 'end', new OverState(next_state: 'start')

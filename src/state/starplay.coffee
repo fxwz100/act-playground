@@ -21,7 +21,7 @@ module.exports = class StarPlayState
 
   name: 'starplay'
 
-  constructor: ({@next_state}) ->
+  constructor: ({@over_state, @pass_state}) ->
 
   preload: ->
     @load.image 'game-background', 'assets/game-bg.png'
@@ -145,6 +145,11 @@ module.exports = class StarPlayState
         .start()
 
         player.agent.kill =>
-          @state.start @next_state, yes, no, @character
+          @state.start @over_state, yes, no, @character
+
+        @gameover = yes
+
+      else if player.x > @world.width
+        @state.start @pass_state, yes, no, @character
 
         @gameover = yes
