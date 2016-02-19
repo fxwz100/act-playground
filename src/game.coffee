@@ -8,10 +8,8 @@ game = new Phaser.Game 800, 600, Phaser.AUTO, 'action'
 add = (s, autoplay=off) ->
   game.state.add s.name, s, autoplay
 
-game.state.add 'start', new WelcomeState(next_state: 'dialog'), on
-game.state.add 'play', new StarPlayState(next_state: 'end')
-game.state.add 'end', new OverState(next_state: 'start')
-game.state.add 'dialog', new Narrator
+game.state.add 'start', new WelcomeState(next_state: 'init'), on
+game.state.add 'init', new Narrator
   scripts:[
     {description: text: '我是一个平凡的人。'}
     {description: text: '可能平凡得不能再平凡了。'}
@@ -49,4 +47,22 @@ game.state.add 'dialog', new Narrator
         y: 450
     }
   ]
-  next_state: 'play'
+  next_state: 'star'
+game.state.add 'star', new StarPlayState(next_state: 'star-end')
+game.state.add 'star-end', new Narrator
+  scripts:[
+    {
+      description:
+        text: '纳尼？！什么鬼'
+        y: 450
+      image:
+        name: 'welcome-bg'
+        url: 'assets/welcome-bg.png'
+    }
+    {description: text: '我被星星砸死了？'}
+    {description: text: '可是我还有一个梦想。'}
+    {description: text: '啊喂！'}
+    {description: text: '我还要做出一个游戏啊！'}
+  ]
+  next_state: 'end'
+game.state.add 'end', new OverState(next_state: 'start')

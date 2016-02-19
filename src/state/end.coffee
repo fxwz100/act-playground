@@ -9,8 +9,8 @@ class OverState
   init: (@character) ->
 
   preload: ->
-    @load.image 'restart-btn', 'assets/reload-btn.png'
-    @load.image 'menu-btn', 'assets/menu-btn.png'
+    @load.spritesheet 'restart-btn', 'assets/restart-btn.png', 120, 35
+    @load.spritesheet 'menu-btn', 'assets/menu-btn.png', 120, 35
 
   create: ->
     # add overlay
@@ -26,8 +26,8 @@ class OverState
 
     # add text
     text_x = @world.centerX
-    text_y = @world.centerY - 25
-    @text = @add.text text_x, text_y, '胜负乃兵家常事，大侠重新来过吧！',
+    text_y = @world.centerY
+    @text = @add.text text_x, text_y, '有事忙故事没编下去，\n   关注 github 的更新吧 😂',
       fontSize: '32px'
       fill: '#fff'
     @text.anchor.setTo 0.5, 0.5
@@ -37,9 +37,10 @@ class OverState
     .start()
 
     # add button
-    restart_btn = @add.button @world.centerX, @world.centerY + 50, 'restart-btn', =>
-      @state.start 'play'
-    restart_btn.anchor.setTo 1.5, 0
+    restart_btn = @add.button @world.centerX, @world.centerY + 100, 'restart-btn', =>
+      @state.start 'init'
+    , @, 1, 0
+    restart_btn.anchor.setTo 0.5, 0.5
 
     @add.tween restart_btn
     .from alpha: 0
@@ -49,9 +50,10 @@ class OverState
     .start()
 
     # add button
-    menu_btn = @add.button @world.centerX, @world.centerY + 50, 'menu-btn', =>
-      @state.start 'welcome'
-    menu_btn.anchor.setTo -0.5, 0
+    menu_btn = @add.button @world.centerX, @world.centerY + 160, 'menu-btn', =>
+      @state.start 'start'
+    , @, 1, 0
+    menu_btn.anchor.setTo 0.5, 0.5
 
     @add.tween menu_btn
     .from alpha: 0

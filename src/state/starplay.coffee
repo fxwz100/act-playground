@@ -129,6 +129,6 @@ module.exports = class StarPlayState
 
     if player.agent.props.hp < 0
       player.agent.kill =>
-        @state.start @next_state, no, no, @character
+        @state.start @next_state, yes, no, @character
 
     stars.enableBody = player.x > 30

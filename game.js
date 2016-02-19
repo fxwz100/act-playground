@@ -64,18 +64,10 @@
 	};
 
 	game.state.add('start', new WelcomeState({
-	  next_state: 'dialog'
+	  next_state: 'init'
 	}), true);
 
-	game.state.add('play', new StarPlayState({
-	  next_state: 'end'
-	}));
-
-	game.state.add('end', new OverState({
-	  next_state: 'start'
-	}));
-
-	game.state.add('dialog', new Narrator({
+	game.state.add('init', new Narrator({
 	  scripts: [
 	    {
 	      description: {
@@ -165,7 +157,47 @@
 	      }
 	    }
 	  ],
-	  next_state: 'play'
+	  next_state: 'star'
+	}));
+
+	game.state.add('star', new StarPlayState({
+	  next_state: 'star-end'
+	}));
+
+	game.state.add('star-end', new Narrator({
+	  scripts: [
+	    {
+	      description: {
+	        text: '纳尼？！什么鬼',
+	        y: 450
+	      },
+	      image: {
+	        name: 'welcome-bg',
+	        url: 'assets/welcome-bg.png'
+	      }
+	    }, {
+	      description: {
+	        text: '我被星星砸死了？'
+	      }
+	    }, {
+	      description: {
+	        text: '可是我还有一个梦想。'
+	      }
+	    }, {
+	      description: {
+	        text: '啊喂！'
+	      }
+	    }, {
+	      description: {
+	        text: '我还要做出一个游戏啊！'
+	      }
+	    }
+	  ],
+	  next_state: 'end'
+	}));
+
+	game.state.add('end', new OverState({
+	  next_state: 'start'
 	}));
 
 
@@ -304,7 +336,7 @@
 	    if (player.agent.props.hp < 0) {
 	      player.agent.kill((function(_this) {
 	        return function() {
-	          return _this.state.start(_this.next_state, false, false, _this.character);
+	          return _this.state.start(_this.next_state, true, false, _this.character);
 	        };
 	      })(this));
 	    }
@@ -439,7 +471,7 @@
 	      }, 200, Phaser.Easing.Bounce.Out, true);
 	    }
 	    if (cb) {
-	      return setTimeout(cb, 500);
+	      return setTimeout(cb, 1000);
 	    }
 	  };
 
@@ -464,6 +496,9 @@
 	    this.sprite = this.group.create(x, y, 'star', 0);
 	    this.sprite.anchor.setTo(0.5, 0.5);
 	    this.sprite.scale.setTo(scale);
+	    this.game.add.tween(this.sprite).to({
+	      alpha: 0
+	    }, 500 + Math.random() * 500, 'Linear', true, Math.random() * 1000, -1, true);
 	    this.sprite.body.allowGravity = false;
 	    this.sprite.body.gravity.y = 300 * scale;
 	    this.sprite.body.bounce.y = 0.7 + Math.random() * 0.2;
@@ -545,6 +580,19 @@
 	    this.scripts = arg.scripts, this.next_state = arg.next_state;
 	  }
 
+	  NarratorState.prototype.next_scene = function() {
+	    this.add.tween(this.screen).to({
+	      alpha: 0
+	    }, 500).start().onComplete.add((function(_this) {
+	      return function() {
+	        return _this.state.start(_this.next_state);
+	      };
+	    })(this));
+	    return this.add.tween(this.text).to({
+	      alpha: 0
+	    }, 500).start();
+	  };
+
 	  NarratorState.prototype.preload = function() {
 	    var i, len, ref, results, script;
 	    ref = this.scripts;
@@ -561,7 +609,7 @@
 	  };
 
 	  NarratorState.prototype.create = function() {
-	    var current_script, ref, ref1, screen_in, text_in, text_x, text_y;
+	    var current_script, ref, ref1, ref2, ref3, screen_in, skip_btn, skip_text, skip_texture, text_in, text_x, text_y;
 	    this.index = 0;
 	    if (this.scripts.length > 0) {
 	      current_script = this.scripts[this.index];
@@ -576,29 +624,12 @@
 	            }
 	            return this.text_fade.start();
 	          } else {
-	            this.add.tween(this.screen).to({
-	              alpha: 0
-	            }, 500).start().onComplete.add((function(_this) {
-	              return function() {
-	                return _this.state.start(_this.next_state);
-	              };
-	            })(this));
-	            return this.add.tween(this.text).to({
-	              alpha: 0
-	            }, 500).start();
+	            return this.next_scene();
 	          }
 	        }
 	      }, this);
 	      this.screen.alpha = 0;
 	      this.screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600);
-	      text_x = this.world.centerX;
-	      text_y = this.world.centerY;
-	      this.text = this.add.text(text_x, text_y, (ref1 = current_script.description) != null ? ref1.text : void 0, {
-	        fontSize: '36pt',
-	        fill: '#fff'
-	      });
-	      this.text.anchor.setTo(0.5, 0.5);
-	      this.text.alpha = 0;
 	      screen_in = this.add.tween(this.screen).to({
 	        alpha: 1
 	      }, 500).start();
@@ -610,23 +641,47 @@
 	          return this.screen.loadTexture(this.scripts[this.index].image.name);
 	        }
 	      }, this);
+	      text_x = ((ref1 = current_script.description) != null ? ref1.x : void 0) || this.world.centerX;
+	      text_y = ((ref2 = current_script.description) != null ? ref2.y : void 0) || this.world.centerY;
+	      this.text = this.add.text(text_x, text_y, (ref3 = current_script.description) != null ? ref3.text : void 0, {
+	        fontSize: '36pt',
+	        fill: '#fff'
+	      });
+	      this.text.anchor.setTo(0.5, 0.5);
+	      this.text.alpha = 0;
 	      text_in = this.add.tween(this.text).to({
 	        alpha: 1
 	      }, 500).start();
 	      this.text_fade = this.add.tween(this.text).to({
 	        alpha: 0
 	      }, 500).chain(text_in);
-	      return this.text_fade.onComplete.add(function() {
+	      this.text_fade.onComplete.add(function() {
 	        var script;
 	        script = this.scripts[this.index];
 	        if (script.description) {
 	          this.text.text = script.description.text;
-	          this.text.x = script.description.x || this.world.centerX;
-	          return this.text.y = script.description.y || this.world.centerY;
+	          this.text.x = script.description.x || this.text.x;
+	          return this.text.y = script.description.y || this.text.y;
 	        } else {
 	          return this.text.text = '';
 	        }
 	      }, this);
+	      skip_text = this.make.text(0, 0, 'Skip >', {
+	        fontSize: '16pt',
+	        fill: '#fff'
+	      });
+	      skip_texture = this.add.renderTexture(skip_text.width, skip_text.height);
+	      skip_texture.render(skip_text);
+	      skip_btn = this.add.button(this.world.width, this.world.height, null, (function(_this) {
+	        return function() {
+	          return _this.next_scene();
+	        };
+	      })(this));
+	      skip_btn.anchor.setTo(1.5, 1.5);
+	      skip_btn.loadTexture(skip_texture);
+	      return this.add.tween(skip_btn).to({
+	        alpha: 0
+	      }, 1000, 'Linear', true, 0, -1, true);
 	    } else {
 	      return this.state.start(this.next_state);
 	    }
@@ -713,8 +768,8 @@
 	  };
 
 	  OverState.prototype.preload = function() {
-	    this.load.image('restart-btn', 'assets/reload-btn.png');
-	    return this.load.image('menu-btn', 'assets/menu-btn.png');
+	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
+	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
 	  };
 
 	  OverState.prototype.create = function() {
@@ -728,8 +783,8 @@
 	      alpha: 0
 	    }).start();
 	    text_x = this.world.centerX;
-	    text_y = this.world.centerY - 25;
-	    this.text = this.add.text(text_x, text_y, '胜负乃兵家常事，大侠重新来过吧！', {
+	    text_y = this.world.centerY;
+	    this.text = this.add.text(text_x, text_y, '有事忙故事没编下去，\n   关注 github 的更新吧 😂', {
 	      fontSize: '32px',
 	      fill: '#fff'
 	    });
@@ -737,12 +792,12 @@
 	    this.add.tween(this.text).from({
 	      alpha: 0
 	    }).start();
-	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 50, 'restart-btn', (function(_this) {
+	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'restart-btn', (function(_this) {
 	      return function() {
-	        return _this.state.start('play');
+	        return _this.state.start('init');
 	      };
-	    })(this));
-	    restart_btn.anchor.setTo(1.5, 0);
+	    })(this), this, 1, 0);
+	    restart_btn.anchor.setTo(0.5, 0.5);
 	    this.add.tween(restart_btn).from({
 	      alpha: 0
 	    }).start();
@@ -750,12 +805,12 @@
 	      x: 2,
 	      y: 2
 	    }, 1000, Phaser.Easing.Bounce.Out).start();
-	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 50, 'menu-btn', (function(_this) {
+	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'menu-btn', (function(_this) {
 	      return function() {
-	        return _this.state.start('welcome');
+	        return _this.state.start('start');
 	      };
-	    })(this));
-	    menu_btn.anchor.setTo(-0.5, 0);
+	    })(this), this, 1, 0);
+	    menu_btn.anchor.setTo(0.5, 0.5);
 	    this.add.tween(menu_btn).from({
 	      alpha: 0
 	    }).start();

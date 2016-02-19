@@ -7,6 +7,9 @@ module.exports = class Star
     @sprite.anchor.setTo 0.5, 0.5
     @sprite.scale.setTo scale
 
+    @game.add.tween @sprite
+    .to alpha: 0, 500 + Math.random() * 500, 'Linear', yes, Math.random() * 1000, -1, yes
+
     # physics
     @sprite.body.allowGravity = off
     @sprite.body.gravity.y = 300 * scale

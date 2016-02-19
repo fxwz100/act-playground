@@ -112,4 +112,4 @@ module.exports = class Player
       .to angle: 90, 200, Phaser.Easing.Bounce.Out, on
 
     if cb
-      setTimeout cb, 500
+      setTimeout cb, 1000
