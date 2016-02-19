@@ -59,7 +59,7 @@ game.state.add 'init', new Narrator
 
 game.state.add 'star', new StarPlayState
   over_state: 'star-1'
-  pass_state: 'star-1'
+  pass_state: 'star-2'
 
 game.state.add 'star-1', new Narrator
   scripts:[
@@ -75,6 +75,22 @@ game.state.add 'star-1', new Narrator
     {description: text: '可是我还有一个梦想。'}
     {description: text: '啊喂！'}
     {description: text: '我还要做出一个游戏啊！'}
+  ]
+  next_state: 'end'
+
+game.state.add 'star-2', new Narrator
+  scripts:[
+    {
+      description:
+        text: '有惊无险'
+        y: 450
+      image:
+        name: 'welcome-bg'
+        url: 'assets/welcome-bg.png'
+    }
+    {description: text: '总算过去了'}
+    {description: text: '但是这个是什么地方？'}
+    {description: text: '代号为 9 ？'}
   ]
   next_state: 'end'
 

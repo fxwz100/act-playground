@@ -150,6 +150,12 @@ module.exports = class StarPlayState
         @gameover = yes
 
       else if player.x > @world.width
-        @state.start @pass_state, yes, no, @character
+        @world.addChild @overlay
+
+        @add.tween @overlay
+        .from alpha: 0, 1000
+        .start()
+        .onComplete.add =>
+          @state.start @pass_state, yes, no, @character
 
         @gameover = yes

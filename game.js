@@ -166,7 +166,7 @@
 
 	game.state.add('star', new StarPlayState({
 	  over_state: 'star-1',
-	  pass_state: 'star-1'
+	  pass_state: 'star-2'
 	}));
 
 	game.state.add('star-1', new Narrator({
@@ -195,6 +195,34 @@
 	    }, {
 	      description: {
 	        text: '我还要做出一个游戏啊！'
+	      }
+	    }
+	  ],
+	  next_state: 'end'
+	}));
+
+	game.state.add('star-2', new Narrator({
+	  scripts: [
+	    {
+	      description: {
+	        text: '有惊无险',
+	        y: 450
+	      },
+	      image: {
+	        name: 'welcome-bg',
+	        url: 'assets/welcome-bg.png'
+	      }
+	    }, {
+	      description: {
+	        text: '总算过去了'
+	      }
+	    }, {
+	      description: {
+	        text: '但是这个是什么地方？'
+	      }
+	    }, {
+	      description: {
+	        text: '代号为 9 ？'
 	      }
 	    }
 	  ],
@@ -357,7 +385,14 @@
 	        })(this));
 	        return this.gameover = true;
 	      } else if (player.x > this.world.width) {
-	        this.state.start(this.pass_state, true, false, this.character);
+	        this.world.addChild(this.overlay);
+	        this.add.tween(this.overlay).from({
+	          alpha: 0
+	        }, 1000).start().onComplete.add((function(_this) {
+	          return function() {
+	            return _this.state.start(_this.pass_state, true, false, _this.character);
+	          };
+	        })(this));
 	        return this.gameover = true;
 	      }
 	    }
@@ -381,7 +416,7 @@
 	    this.game.physics.arcade.enable(this.sprite);
 	    this.sprite.body.bounce.y = 0.2;
 	    this.sprite.body.gravity.y = 800;
-	    this.sprite.body.collideWorldBounds = true;
+	    this.sprite.body.collideWorldBounds = false;
 	    this.sprite.animations.add('left', [0, 1, 2, 3], 10, true);
 	    this.sprite.animations.add('right', [5, 6, 7, 8], 10, true);
 	    this.sprite.animations.add('common-attack-left', [0, 1, 2, 3], 10, true);
