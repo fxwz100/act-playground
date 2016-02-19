@@ -281,7 +281,13 @@
 	      star = new Star(this, stars, star_x, star_y, star_scale);
 	    }
 	    context.playerStatus.init(this, player);
-	    return this.cursors = this.input.keyboard.createCursorKeys();
+	    this.cursors = this.input.keyboard.createCursorKeys();
+	    this.overlay = this.make.graphics(0, 0);
+	    this.overlay.beginFill('#000', 1);
+	    this.overlay.drawRect(0, 0, 800, 600);
+	    this.overlay.endFill();
+	    this.overlay.alpha = 0.7;
+	    return this.gameover = false;
 	  };
 
 	  StarPlayState.prototype.update = function() {
@@ -295,56 +301,62 @@
 	        return star2.kill();
 	      }
 	    });
-	    fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
-	      star.agent.fight(player.agent);
-	      return player.agent.fight(star.agent);
-	    }, null, this);
-	    lighted = this.game.physics.arcade.overlap(player, roadlights);
-	    ref1 = stars.children;
-	    for (j = 0, len = ref1.length; j < len; j++) {
-	      star = ref1[j];
-	      if (!(star.body.allowGravity = !lighted)) {
-	        star.body.velocity = {
-	          x: 0,
-	          y: 0
-	        };
+	    if (!this.gameover) {
+	      fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
+	        star.agent.fight(player.agent);
+	        return player.agent.fight(star.agent);
+	      }, null, this);
+	      lighted = this.game.physics.arcade.overlap(player, roadlights);
+	      ref1 = stars.children;
+	      for (j = 0, len = ref1.length; j < len; j++) {
+	        star = ref1[j];
+	        if (!(star.body.allowGravity = !lighted)) {
+	          star.body.velocity = {
+	            x: 0,
+	            y: 0
+	          };
+	        }
+	      }
+	      context.playerStatus.update(player.agent);
+	      player.agent.stop();
+	      switch (false) {
+	        case !this.cursors.left.isDown:
+	          player.agent.walkLeft();
+	          break;
+	        case !this.cursors.right.isDown:
+	          player.agent.walkRight();
+	          break;
+	        case !!fighting:
+	          player.agent.still();
+	      }
+	      if (this.cursors.up.isDown) {
+	        player.agent.chop();
+	      }
+	      if (this.cursors.down.isDown) {
+	        player.agent.cutoff();
+	      }
+	      if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	        player.agent.jump();
+	      }
+	      player.agent.update(this.character);
+	      ref2 = stars.children;
+	      for (k = 0, len1 = ref2.length; k < len1; k++) {
+	        star = ref2[k];
+	        star.agent.update(this.character);
+	      }
+	      if (player.agent.props.hp < 0) {
+	        this.world.addChild(this.overlay);
+	        this.add.tween(this.overlay).from({
+	          alpha: 0
+	        }, 1000).start();
+	        player.agent.kill((function(_this) {
+	          return function() {
+	            return _this.state.start(_this.next_state, true, false, _this.character);
+	          };
+	        })(this));
+	        return this.gameover = true;
 	      }
 	    }
-	    context.playerStatus.update(player.agent);
-	    player.agent.stop();
-	    switch (false) {
-	      case !this.cursors.left.isDown:
-	        player.agent.walkLeft();
-	        break;
-	      case !this.cursors.right.isDown:
-	        player.agent.walkRight();
-	        break;
-	      case !!fighting:
-	        player.agent.still();
-	    }
-	    if (this.cursors.up.isDown) {
-	      player.agent.chop();
-	    }
-	    if (this.cursors.down.isDown) {
-	      player.agent.cutoff();
-	    }
-	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-	      player.agent.jump();
-	    }
-	    player.agent.update(this.character);
-	    ref2 = stars.children;
-	    for (k = 0, len1 = ref2.length; k < len1; k++) {
-	      star = ref2[k];
-	      star.agent.update(this.character);
-	    }
-	    if (player.agent.props.hp < 0) {
-	      player.agent.kill((function(_this) {
-	        return function() {
-	          return _this.state.start(_this.next_state, true, false, _this.character);
-	        };
-	      })(this));
-	    }
-	    return stars.enableBody = player.x > 30;
 	  };
 
 	  return StarPlayState;

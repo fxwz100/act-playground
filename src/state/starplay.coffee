@@ -78,6 +78,15 @@ module.exports = class StarPlayState
 
     @cursors = @input.keyboard.createCursorKeys()
 
+    # create the overlay for end animation.
+    @overlay = @make.graphics 0, 0
+    @overlay.beginFill '#000', 1
+    @overlay.drawRect 0, 0, 800, 600
+    @overlay.endFill()
+    @overlay.alpha = 0.7
+
+    @gameover = no
+
   update: ->
     {player, stars, platforms, roadlights} = @character
 
@@ -89,46 +98,53 @@ module.exports = class StarPlayState
         star1.kill()
         star2.kill()
 
-    fighting = @physics.arcade.overlap player, stars, (player, star) ->
-      star.agent.fight player.agent
-      player.agent.fight star.agent
-    , null, @
+    unless @gameover
+      fighting = @physics.arcade.overlap player, stars, (player, star) ->
+        star.agent.fight player.agent
+        player.agent.fight star.agent
+      , null, @
 
-    lighted = @game.physics.arcade.overlap player, roadlights
+      lighted = @game.physics.arcade.overlap player, roadlights
 
-    for star in stars.children
-      unless star.body.allowGravity = not lighted
-        star.body.velocity = x: 0, y: 0
+      for star in stars.children
+        unless star.body.allowGravity = not lighted
+          star.body.velocity = x: 0, y: 0
 
-    context.playerStatus.update player.agent
+      context.playerStatus.update player.agent
 
-    player.agent.stop()
+      player.agent.stop()
 
-    # detect left/right moving.
-    switch
-      when @cursors.left.isDown
-        player.agent.walkLeft()
-      when @cursors.right.isDown
-        player.agent.walkRight()
-      when not fighting
-        player.agent.still()
+      # detect left/right moving.
+      switch
+        when @cursors.left.isDown
+          player.agent.walkLeft()
+        when @cursors.right.isDown
+          player.agent.walkRight()
+        when not fighting
+          player.agent.still()
 
-    if @cursors.up.isDown
-      player.agent.chop()
+      if @cursors.up.isDown
+        player.agent.chop()
 
-    if @cursors.down.isDown
-      player.agent.cutoff()
+      if @cursors.down.isDown
+        player.agent.cutoff()
 
-    # track jumping
-    if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
-      player.agent.jump()
+      # track jumping
+      if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+        player.agent.jump()
 
-    player.agent.update @character
-    for star in stars.children
-      star.agent.update @character
+      player.agent.update @character
+      for star in stars.children
+        star.agent.update @character
 
-    if player.agent.props.hp < 0
-      player.agent.kill =>
-        @state.start @next_state, yes, no, @character
+      if player.agent.props.hp < 0
+        @world.addChild @overlay
 
-    stars.enableBody = player.x > 30
+        @add.tween @overlay
+        .from alpha: 0, 1000
+        .start()
+
+        player.agent.kill =>
+          @state.start @next_state, yes, no, @character
+
+        @gameover = yes
