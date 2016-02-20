@@ -23,10 +23,11 @@ game.state.add 'init', new Narrator
     {description: text: '我是一个平凡的人。'}
     {description: text: '可能平凡得不能再平凡了。'}
     {description: text: '但是我有一个梦想。'}
-    {description: text: '梦想有一天，'}
+    {description: text: '梦想以后，'}
     {description: text: '我能做出很多很多游戏。'}
     {description: text: '直到有一天，她出现了。'}
     {
+      description: text: '像公主一样。'
       image:
         name: 'girl'
         url: 'assets/girl.jpg'
@@ -97,7 +98,7 @@ game.state.add 'star-2', new Narrator
   next_state: 'end'
 
 game.state.add 'temp', new TempState
-  description: '再来一次吧？'
+  description: '我还要去救她……'
   menu_state: 'menu'
 
 game.state.add 'end', new EndState

@@ -3,7 +3,7 @@ module.exports = class TempState
 
   constructor: ({@description, @menu_state}) ->
 
-  init: (@character, @restart_state) ->
+  init: (@character) ->
 
   preload: ->
     @load.spritesheet 'restart-btn', 'assets/restart-btn.png', 120, 35
@@ -35,7 +35,7 @@ module.exports = class TempState
 
     # add button
     restart_btn = @add.button @world.centerX, @world.centerY + 100, 'restart-btn', =>
-      @state.start @restart_state
+      @state.start @state.lastPlayed
     , @, 1, 0
     restart_btn.anchor.setTo 0.5, 0.5
 

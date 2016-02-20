@@ -89,7 +89,7 @@
 	      }
 	    }, {
 	      description: {
-	        text: '梦想有一天，'
+	        text: '梦想以后，'
 	      }
 	    }, {
 	      description: {
@@ -100,6 +100,9 @@
 	        text: '直到有一天，她出现了。'
 	      }
 	    }, {
+	      description: {
+	        text: '像公主一样。'
+	      },
 	      image: {
 	        name: 'girl',
 	        url: 'assets/girl.jpg'
@@ -224,7 +227,7 @@
 	}));
 
 	game.state.add('temp', new TempState({
-	  description: '再来一次吧？',
+	  description: '我还要去救她……',
 	  menu_state: 'menu'
 	}));
 
@@ -748,8 +751,6 @@
 	};
 
 	module.exports = StarPlayState = (function() {
-	  StarPlayState.prototype.name = 'starplay';
-
 	  function StarPlayState(arg) {
 	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
 	  }
@@ -864,6 +865,7 @@
 	        }, 1000).start();
 	        player.agent.kill((function(_this) {
 	          return function() {
+	            _this.state.lastPlayed = _this.state.current;
 	            return _this.state.start(_this.over_state, true, false, _this.character);
 	          };
 	        })(this));
@@ -899,9 +901,8 @@
 	    this.description = arg.description, this.menu_state = arg.menu_state;
 	  }
 
-	  TempState.prototype.init = function(character, restart_state) {
+	  TempState.prototype.init = function(character) {
 	    this.character = character;
-	    this.restart_state = restart_state;
 	  };
 
 	  TempState.prototype.preload = function() {
@@ -931,7 +932,7 @@
 	    }).start();
 	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'restart-btn', (function(_this) {
 	      return function() {
-	        return _this.state.start(_this.restart_state);
+	        return _this.state.start(_this.state.lastPlayed);
 	      };
 	    })(this), this, 1, 0);
 	    restart_btn.anchor.setTo(0.5, 0.5);

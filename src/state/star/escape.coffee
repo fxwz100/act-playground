@@ -19,8 +19,6 @@ context =
 
 module.exports = class StarPlayState
 
-  name: 'starplay'
-
   constructor: ({@over_state, @pass_state}) ->
 
   preload: ->
@@ -145,6 +143,7 @@ module.exports = class StarPlayState
         .start()
 
         player.agent.kill =>
+          @state.lastPlayed = @state.current
           @state.start @over_state, yes, no, @character
 
         @gameover = yes
