@@ -87,7 +87,7 @@ module.exports = class StarEscapeState
   # updates specific to game logic.
   _gameUpdate: ->
     {player, stars, platforms, roadlights} = @character
-    
+
     @physics.arcade.overlap stars, stars, (star1, star2) ->
       if star1 isnt star2
         star1.kill()
