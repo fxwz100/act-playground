@@ -221,7 +221,7 @@
 	}));
 
 	game.state.add('temp', new TempState({
-	  description: '我还要去救她……',
+	  description: '我还要去救她啊……',
 	  menu_state: 'menu'
 	}));
 
