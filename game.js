@@ -44,9 +44,9 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Narrator, OverState, StarPlayState, WelcomeState, game;
+	var Narrator, OverState, StarEscapeState, WelcomeState, game;
 
-	StarPlayState = __webpack_require__(1);
+	StarEscapeState = __webpack_require__(10);
 
 	WelcomeState = __webpack_require__(7);
 
@@ -63,11 +63,11 @@
 	    this.scale.pageAlignVertically = true;
 	    this.scale.setScreenSize = true;
 	    this.scale.aspectRatio = 4 / 3;
-	    return this.state.start('start');
+	    return this.state.start('menu');
 	  }
 	}, true);
 
-	game.state.add('start', new WelcomeState({
+	game.state.add('menu', new WelcomeState({
 	  next_state: 'init'
 	}));
 
@@ -91,19 +91,11 @@
 	      }
 	    }, {
 	      description: {
-	        text: '我能做出一个游戏。'
+	        text: '我能做出很多很多游戏。'
 	      }
 	    }, {
 	      description: {
-	        text: '我从未动摇。'
-	      }
-	    }, {
-	      description: {
-	        text: '直到有一天，'
-	      }
-	    }, {
-	      description: {
-	        text: '她出现了。'
+	        text: '直到有一天，她出现了。'
 	      }
 	    }, {
 	      image: {
@@ -112,11 +104,31 @@
 	      }
 	    }, {
 	      description: {
-	        text: '她告诉我：'
+	        text: '她教会我很多别的事情。'
 	      }
 	    }, {
 	      description: {
-	        text: '「你该找工作了，\n否则我将离你而去！」'
+	        text: '我们很开心。'
+	      }
+	    }, {
+	      description: {
+	        text: '我开始喜欢游戏以外的世界。'
+	      }
+	    }, {
+	      description: {
+	        text: '但有一天，'
+	      }
+	    }, {
+	      description: {
+	        text: '她告诉我：\n  医生说她要到另一个世界去了。'
+	      }
+	    }, {
+	      description: {
+	        text: '『这怎么行！』'
+	      }
+	    }, {
+	      description: {
+	        text: '我想阻止她。'
 	      }
 	    }, {
 	      image: {
@@ -131,15 +143,7 @@
 	      }
 	    }, {
 	      description: {
-	        text: '我放弃了。'
-	      }
-	    }, {
-	      description: {
-	        text: '所有人离我而去。'
-	      }
-	    }, {
-	      description: {
-	        text: '我孤独地回到家，'
+	        text: '我独自地回到家，'
 	      }
 	    }, {
 	      description: {
@@ -156,15 +160,15 @@
 	      }
 	    }, {
 	      description: {
-	        text: '这是什么？！',
+	        text: '我到了哪里？！',
 	        y: 450
 	      }
 	    }
 	  ],
-	  next_state: 'star'
+	  next_state: 'star-init'
 	}));
 
-	game.state.add('star', new StarPlayState({
+	game.state.add('star-init', new StarEscapeState({
 	  over_state: 'star-1',
 	  pass_state: 'star-2'
 	}));
@@ -186,15 +190,7 @@
 	      }
 	    }, {
 	      description: {
-	        text: '可是我还有一个梦想。'
-	      }
-	    }, {
-	      description: {
-	        text: '啊喂！'
-	      }
-	    }, {
-	      description: {
-	        text: '我还要做出一个游戏啊！'
+	        text: '可是我还有一个梦想啊。'
 	      }
 	    }
 	  ],
@@ -205,24 +201,20 @@
 	  scripts: [
 	    {
 	      description: {
-	        text: '有惊无险',
+	        text: '不能碰到星星？'
+	      }
+	    }, {
+	      description: {
+	        text: '但下一步是什么呢？'
+	      }
+	    }, {
+	      description: {
+	        text: '这是什么意思？',
 	        y: 450
 	      },
 	      image: {
 	        name: 'welcome-bg',
 	        url: 'assets/welcome-bg.png'
-	      }
-	    }, {
-	      description: {
-	        text: '总算过去了'
-	      }
-	    }, {
-	      description: {
-	        text: '但是这个是什么地方？'
-	      }
-	    }, {
-	      description: {
-	        text: '代号为 9 ？'
 	      }
 	    }
 	  ],
@@ -230,180 +222,13 @@
 	}));
 
 	game.state.add('end', new OverState({
-	  next_state: 'start'
+	  restart_state: 'star',
+	  menu_state: 'menu'
 	}));
 
 
 /***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Player, Star, StarPlayState, context;
-
-	Player = __webpack_require__(2);
-
-	Star = __webpack_require__(3);
-
-	context = {
-	  playerStatus: {
-	    textify: function(player) {
-	      return "HP: " + player.props.hp + "\nMP: " + player.state.mp;
-	    },
-	    init: function(game, player) {
-	      return this.sprite = game.add.text(16, 16, this.textify(player), {
-	        fontSize: '24px',
-	        fill: '#fff'
-	      });
-	    },
-	    update: function(player) {
-	      return this.sprite.text = this.textify(player);
-	    }
-	  },
-	  cursors: null,
-	  state: 'play'
-	};
-
-	module.exports = StarPlayState = (function() {
-	  StarPlayState.prototype.name = 'starplay';
-
-	  function StarPlayState(arg) {
-	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
-	  }
-
-	  StarPlayState.prototype.preload = function() {
-	    this.load.image('game-background', 'assets/game-bg.png');
-	    this.load.image('ground', 'assets/ground.png');
-	    this.load.spritesheet('star', 'assets/stars.png', 24, 22);
-	    this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-	    this.load.spritesheet('diamond', 'assets/weapon.png', 64, 64);
-	    return this.load.image('road-light', 'assets/road-light.png');
-	  };
-
-	  StarPlayState.prototype.create = function() {
-	    var ground, i, j, k, platforms, player, roadlight, roadlight_x, roadlight_y, roadlights, star, star_scale, star_x, star_y, stars;
-	    this.physics.startSystem(Phaser.Physics.ARCADE);
-	    this.character = {};
-	    this.add.sprite(0, 0, 'game-background');
-	    platforms = this.character.platforms = this.add.group();
-	    platforms.enableBody = true;
-	    ground = platforms.create(0, this.world.height - 64, 'ground');
-	    ground.scale.setTo(2, 2);
-	    ground.body.immovable = true;
-	    roadlights = this.character.roadlights = this.add.group();
-	    roadlights.enableBody = true;
-	    for (i = j = 0; j <= 2; i = ++j) {
-	      roadlight_x = 100 + i * 300;
-	      roadlight_y = this.world.height - 64;
-	      roadlight = roadlights.create(roadlight_x, roadlight_y, 'road-light');
-	      roadlight.anchor.setTo(0.5, 1);
-	      roadlight.body.immovable = true;
-	      roadlight.bounds;
-	    }
-	    player = new Player(this);
-	    this.character.player = player.sprite;
-	    stars = this.character.stars = this.add.group();
-	    stars.enableBody = true;
-	    for (i = k = 0; k <= 24; i = ++k) {
-	      star_x = Math.random() * 20 + (i / 2) * 70;
-	      star_y = 10 + Math.random() * 50;
-	      star_scale = 0.5 + 0.5 * Math.random();
-	      star = new Star(this, stars, star_x, star_y, star_scale);
-	    }
-	    context.playerStatus.init(this, player);
-	    this.cursors = this.input.keyboard.createCursorKeys();
-	    this.overlay = this.make.graphics(0, 0);
-	    this.overlay.beginFill('#000', 1);
-	    this.overlay.drawRect(0, 0, 800, 600);
-	    this.overlay.endFill();
-	    this.overlay.alpha = 0.7;
-	    return this.gameover = false;
-	  };
-
-	  StarPlayState.prototype.update = function() {
-	    var fighting, j, k, len, len1, lighted, platforms, player, ref, ref1, ref2, roadlights, star, stars;
-	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
-	    this.physics.arcade.collide(player, platforms);
-	    this.physics.arcade.collide(stars, platforms);
-	    this.physics.arcade.overlap(stars, stars, function(star1, star2) {
-	      if (star1 !== star2) {
-	        star1.kill();
-	        return star2.kill();
-	      }
-	    });
-	    if (!this.gameover) {
-	      fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
-	        star.agent.fight(player.agent);
-	        return player.agent.fight(star.agent);
-	      }, null, this);
-	      lighted = this.game.physics.arcade.overlap(player, roadlights);
-	      ref1 = stars.children;
-	      for (j = 0, len = ref1.length; j < len; j++) {
-	        star = ref1[j];
-	        if (!(star.body.allowGravity = !lighted)) {
-	          star.body.velocity = {
-	            x: 0,
-	            y: 0
-	          };
-	        }
-	      }
-	      context.playerStatus.update(player.agent);
-	      player.agent.stop();
-	      switch (false) {
-	        case !this.cursors.left.isDown:
-	          player.agent.walkLeft();
-	          break;
-	        case !this.cursors.right.isDown:
-	          player.agent.walkRight();
-	          break;
-	        case !!fighting:
-	          player.agent.still();
-	      }
-	      if (this.cursors.up.isDown) {
-	        player.agent.chop();
-	      }
-	      if (this.cursors.down.isDown) {
-	        player.agent.cutoff();
-	      }
-	      if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-	        player.agent.jump();
-	      }
-	      player.agent.update(this.character);
-	      ref2 = stars.children;
-	      for (k = 0, len1 = ref2.length; k < len1; k++) {
-	        star = ref2[k];
-	        star.agent.update(this.character);
-	      }
-	      if (player.agent.props.hp < 0) {
-	        this.world.addChild(this.overlay);
-	        this.add.tween(this.overlay).from({
-	          alpha: 0
-	        }, 1000).start();
-	        player.agent.kill((function(_this) {
-	          return function() {
-	            return _this.state.start(_this.over_state, true, false, _this.character);
-	          };
-	        })(this));
-	        return this.gameover = true;
-	      } else if (player.x > this.world.width) {
-	        this.world.addChild(this.overlay);
-	        this.add.tween(this.overlay).from({
-	          alpha: 0
-	        }, 1000).start().onComplete.add((function(_this) {
-	          return function() {
-	            return _this.state.start(_this.pass_state, true, false, _this.character);
-	          };
-	        })(this));
-	        return this.gameover = true;
-	      }
-	    }
-	  };
-
-	  return StarPlayState;
-
-	})();
-
-
-/***/ },
+/* 1 */,
 /* 2 */
 /***/ function(module, exports) {
 
@@ -761,11 +586,9 @@
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var StarPlayState, WelcomeState;
-
-	StarPlayState = __webpack_require__(1);
+	var WelcomeState;
 
 	module.exports = WelcomeState = (function() {
 	  WelcomeState.prototype.name = 'welcome';
@@ -827,7 +650,7 @@
 	  OverState.prototype.name = 'over';
 
 	  function OverState(arg) {
-	    this.next_state = arg.next_state;
+	    this.restart_state = arg.restart_state, this.menu_state = arg.menu_state;
 	  }
 
 	  OverState.prototype.init = function(character) {
@@ -851,7 +674,7 @@
 	    }).start();
 	    text_x = this.world.centerX;
 	    text_y = this.world.centerY;
-	    this.text = this.add.text(text_x, text_y, '未完待续，关注github更新吧 :)', {
+	    this.text = this.add.text(text_x, text_y, '后续更新请持续关注github吧 :)', {
 	      fontSize: '32px',
 	      fill: '#fff'
 	    });
@@ -861,7 +684,7 @@
 	    }).start();
 	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'restart-btn', (function(_this) {
 	      return function() {
-	        return _this.state.start('init');
+	        return _this.state.start(_this.restart_state);
 	      };
 	    })(this), this, 1, 0);
 	    restart_btn.anchor.setTo(0.5, 0.5);
@@ -874,7 +697,7 @@
 	    }, 1000, Phaser.Easing.Bounce.Out).start();
 	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'menu-btn', (function(_this) {
 	      return function() {
-	        return _this.state.start('start');
+	        return _this.state.start(_this.menu_state);
 	      };
 	    })(this), this, 1, 0);
 	    menu_btn.anchor.setTo(0.5, 0.5);
@@ -898,6 +721,176 @@
 	  };
 
 	  return OverState;
+
+	})();
+
+
+/***/ },
+/* 9 */,
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Player, Star, StarPlayState, context;
+
+	Player = __webpack_require__(2);
+
+	Star = __webpack_require__(3);
+
+	context = {
+	  playerStatus: {
+	    textify: function(player) {
+	      return "HP: " + player.props.hp + "\nMP: " + player.state.mp;
+	    },
+	    init: function(game, player) {
+	      return this.sprite = game.add.text(16, 16, this.textify(player), {
+	        fontSize: '24px',
+	        fill: '#fff'
+	      });
+	    },
+	    update: function(player) {
+	      return this.sprite.text = this.textify(player);
+	    }
+	  },
+	  cursors: null,
+	  state: 'play'
+	};
+
+	module.exports = StarPlayState = (function() {
+	  StarPlayState.prototype.name = 'starplay';
+
+	  function StarPlayState(arg) {
+	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
+	  }
+
+	  StarPlayState.prototype.preload = function() {
+	    this.load.image('game-background', 'assets/game-bg.png');
+	    this.load.image('ground', 'assets/ground.png');
+	    this.load.spritesheet('star', 'assets/stars.png', 24, 22);
+	    this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+	    this.load.spritesheet('diamond', 'assets/weapon.png', 64, 64);
+	    return this.load.image('road-light', 'assets/road-light.png');
+	  };
+
+	  StarPlayState.prototype.create = function() {
+	    var ground, i, j, k, platforms, player, roadlight, roadlight_x, roadlight_y, roadlights, star, star_scale, star_x, star_y, stars;
+	    this.physics.startSystem(Phaser.Physics.ARCADE);
+	    this.character = {};
+	    this.add.sprite(0, 0, 'game-background');
+	    platforms = this.character.platforms = this.add.group();
+	    platforms.enableBody = true;
+	    ground = platforms.create(0, this.world.height - 64, 'ground');
+	    ground.scale.setTo(2, 2);
+	    ground.body.immovable = true;
+	    roadlights = this.character.roadlights = this.add.group();
+	    roadlights.enableBody = true;
+	    for (i = j = 0; j <= 2; i = ++j) {
+	      roadlight_x = 100 + i * 300;
+	      roadlight_y = this.world.height - 64;
+	      roadlight = roadlights.create(roadlight_x, roadlight_y, 'road-light');
+	      roadlight.anchor.setTo(0.5, 1);
+	      roadlight.body.immovable = true;
+	      roadlight.bounds;
+	    }
+	    player = new Player(this);
+	    this.character.player = player.sprite;
+	    stars = this.character.stars = this.add.group();
+	    stars.enableBody = true;
+	    for (i = k = 0; k <= 24; i = ++k) {
+	      star_x = Math.random() * 20 + (i / 2) * 70;
+	      star_y = 10 + Math.random() * 50;
+	      star_scale = 0.5 + 0.5 * Math.random();
+	      star = new Star(this, stars, star_x, star_y, star_scale);
+	    }
+	    context.playerStatus.init(this, player);
+	    this.cursors = this.input.keyboard.createCursorKeys();
+	    this.overlay = this.make.graphics(0, 0);
+	    this.overlay.beginFill('#000', 1);
+	    this.overlay.drawRect(0, 0, 800, 600);
+	    this.overlay.endFill();
+	    this.overlay.alpha = 0.7;
+	    return this.gameover = false;
+	  };
+
+	  StarPlayState.prototype.update = function() {
+	    var fighting, j, k, len, len1, lighted, platforms, player, ref, ref1, ref2, roadlights, star, stars;
+	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
+	    this.physics.arcade.collide(player, platforms);
+	    this.physics.arcade.collide(stars, platforms);
+	    this.physics.arcade.overlap(stars, stars, function(star1, star2) {
+	      if (star1 !== star2) {
+	        star1.kill();
+	        return star2.kill();
+	      }
+	    });
+	    if (!this.gameover) {
+	      fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
+	        star.agent.fight(player.agent);
+	        return player.agent.fight(star.agent);
+	      }, null, this);
+	      lighted = this.game.physics.arcade.overlap(player, roadlights);
+	      ref1 = stars.children;
+	      for (j = 0, len = ref1.length; j < len; j++) {
+	        star = ref1[j];
+	        if (!(star.body.allowGravity = !lighted)) {
+	          star.body.velocity = {
+	            x: 0,
+	            y: 0
+	          };
+	        }
+	      }
+	      context.playerStatus.update(player.agent);
+	      player.agent.stop();
+	      switch (false) {
+	        case !this.cursors.left.isDown:
+	          player.agent.walkLeft();
+	          break;
+	        case !this.cursors.right.isDown:
+	          player.agent.walkRight();
+	          break;
+	        case !!fighting:
+	          player.agent.still();
+	      }
+	      if (this.cursors.up.isDown) {
+	        player.agent.chop();
+	      }
+	      if (this.cursors.down.isDown) {
+	        player.agent.cutoff();
+	      }
+	      if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	        player.agent.jump();
+	      }
+	      player.agent.update(this.character);
+	      ref2 = stars.children;
+	      for (k = 0, len1 = ref2.length; k < len1; k++) {
+	        star = ref2[k];
+	        star.agent.update(this.character);
+	      }
+	      if (player.agent.props.hp < 0) {
+	        this.world.addChild(this.overlay);
+	        this.add.tween(this.overlay).from({
+	          alpha: 0
+	        }, 1000).start();
+	        player.agent.kill((function(_this) {
+	          return function() {
+	            return _this.state.start(_this.over_state, true, false, _this.character);
+	          };
+	        })(this));
+	        return this.gameover = true;
+	      } else if (player.x > this.world.width) {
+	        this.world.addChild(this.overlay);
+	        this.add.tween(this.overlay).from({
+	          alpha: 0
+	        }, 1000).start().onComplete.add((function(_this) {
+	          return function() {
+	            return _this.state.start(_this.pass_state, true, false, _this.character);
+	          };
+	        })(this));
+	        return this.gameover = true;
+	      }
+	    }
+	  };
+
+	  return StarPlayState;
 
 	})();
 

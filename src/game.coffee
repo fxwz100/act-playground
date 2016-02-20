@@ -1,4 +1,4 @@
-StarPlayState = require './state/starplay'
+StarEscapeState = require './state/star/escape'
 WelcomeState = require './state/start'
 OverState = require './state/end'
 Narrator = require './state/narrator'
@@ -12,10 +12,10 @@ game.state.add 'adapt',
     @scale.pageAlignVertically = on
     @scale.setScreenSize = on
     @scale.aspectRatio = 4/3
-    @state.start 'start'
+    @state.start 'menu'
 , on
 
-game.state.add 'start', new WelcomeState(next_state: 'init')
+game.state.add 'menu', new WelcomeState(next_state: 'init')
 
 game.state.add 'init', new Narrator
   scripts:[
@@ -23,25 +23,26 @@ game.state.add 'init', new Narrator
     {description: text: '可能平凡得不能再平凡了。'}
     {description: text: '但是我有一个梦想。'}
     {description: text: '梦想有一天，'}
-    {description: text: '我能做出一个游戏。'}
-    {description: text: '我从未动摇。'}
-    {description: text: '直到有一天，'}
-    {description: text: '她出现了。'}
+    {description: text: '我能做出很多很多游戏。'}
+    {description: text: '直到有一天，她出现了。'}
     {
       image:
         name: 'girl'
         url: 'assets/girl.jpg'
     }
-    {description: text: '她告诉我：'}
-    {description: text: '「你该找工作了，\n否则我将离你而去！」'}
+    {description: text: '她教会我很多别的事情。'}
+    {description: text: '我们很开心。'}
+    {description: text: '我开始喜欢游戏以外的世界。'}
+    {description: text: '但有一天，'}
+    {description: text: '她告诉我：\n  医生说她要到另一个世界去了。'}
+    {description: text: '『这怎么行！』'}
+    {description: text: '我想阻止她。'}
     {
       image: name: ''
       description: text: '但我除了游戏以外，'
     }
     {description: text: '一无是处。'}
-    {description: text: '我放弃了。'}
-    {description: text: '所有人离我而去。'}
-    {description: text: '我孤独地回到家，'}
+    {description: text: '我独自地回到家，'}
     {description: text: '沉浸在我的游戏中……'}
     {description: text: '当我醒来时……'}
     {
@@ -51,13 +52,13 @@ game.state.add 'init', new Narrator
     }
     {
       description:
-        text: '这是什么？！'
+        text: '我到了哪里？！'
         y: 450
     }
   ]
-  next_state: 'star'
+  next_state: 'star-init'
 
-game.state.add 'star', new StarPlayState
+game.state.add 'star-init', new StarEscapeState
   over_state: 'star-1'
   pass_state: 'star-2'
 
@@ -72,9 +73,7 @@ game.state.add 'star-1', new Narrator
         url: 'assets/welcome-bg.png'
     }
     {description: text: '我被星星砸死了？'}
-    {description: text: '可是我还有一个梦想。'}
-    {description: text: '啊喂！'}
-    {description: text: '我还要做出一个游戏啊！'}
+    {description: text: '可是我还有一个梦想啊。'}
   ]
   next_state: 'end'
 
@@ -82,16 +81,18 @@ game.state.add 'star-2', new Narrator
   scripts:[
     {
       description:
-        text: '有惊无险'
+        text: '不能碰到星星？'
+    }
+    {description: text: '但下一步是什么呢？'}
+    {
+      description:
+        text: '这是什么意思？'
         y: 450
       image:
         name: 'welcome-bg'
         url: 'assets/welcome-bg.png'
     }
-    {description: text: '总算过去了'}
-    {description: text: '但是这个是什么地方？'}
-    {description: text: '代号为 9 ？'}
   ]
   next_state: 'end'
 
-game.state.add 'end', new OverState(next_state: 'start')
+game.state.add 'end', new OverState(restart_state: 'star', menu_state: 'menu')

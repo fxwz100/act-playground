@@ -1,5 +1,3 @@
-StarPlayState = require './starplay'
-
 module.exports = class WelcomeState
 
   name: 'welcome'

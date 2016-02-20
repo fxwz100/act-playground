@@ -1,5 +1,5 @@
-Player = require '../agent/player'
-Star  = require '../agent/star'
+Player = require '../../agent/player'
+Star  = require '../../agent/star'
 
 context =
   # components

@@ -4,7 +4,7 @@ class OverState
 
   name: 'over'
 
-  constructor: ({@next_state}) ->
+  constructor: ({@restart_state, @menu_state}) ->
 
   init: (@character) ->
 
@@ -27,7 +27,7 @@ class OverState
     # add text
     text_x = @world.centerX
     text_y = @world.centerY
-    @text = @add.text text_x, text_y, '未完待续，关注github更新吧 :)',
+    @text = @add.text text_x, text_y, '后续更新请持续关注github吧 :)',
       fontSize: '32px'
       fill: '#fff'
     @text.anchor.setTo 0.5, 0.5
@@ -38,7 +38,7 @@ class OverState
 
     # add button
     restart_btn = @add.button @world.centerX, @world.centerY + 100, 'restart-btn', =>
-      @state.start 'init'
+      @state.start @restart_state
     , @, 1, 0
     restart_btn.anchor.setTo 0.5, 0.5
 
@@ -51,7 +51,7 @@ class OverState
 
     # add button
     menu_btn = @add.button @world.centerX, @world.centerY + 160, 'menu-btn', =>
-      @state.start 'start'
+      @state.start @menu_state
     , @, 1, 0
     menu_btn.anchor.setTo 0.5, 0.5
 
