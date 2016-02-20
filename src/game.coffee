@@ -12,7 +12,7 @@ game.state.add 'adapt',
     @scale.pageAlignHorizontally = on
     @scale.pageAlignVertically = on
     @scale.setScreenSize = on
-    @scale.aspectRatio = 4/3
+    # @scale.aspectRatio = 4/3
     @state.start 'menu'
 , on
 

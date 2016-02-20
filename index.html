@@ -5,13 +5,16 @@
   <title>Action about Star - Powered by Phaser.io</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="screen-orientation" content="landscape">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
   <script type="text/javascript" src="//cdn.bootcss.com/phaser/2.4.4/custom/phaser-arcade-physics.js"></script>
   <style type="text/css">
-    body {
-      background-color: #eee;
-      margin: 0;
+    html, body {
       width: 100%;
+      height: 100%;
+    }
+    body {
+      background-color: #000;
+      margin: 0;
     }
     @media (min-width: 800px) {
       #action {
@@ -25,11 +28,6 @@
         box-shadow: 0 0 10px #acacac;
         border-radius: 10px;
         overflow: hidden;
-      }
-    }
-    @media (max-width: 800px) {
-      #action {
-        width: 100%;
       }
     }
     .github {
@@ -56,6 +54,16 @@
     @media (orientation: landscape) {
       .note {
         display: none;
+      }
+    }
+    @media (orientation: landscape) and (max-width: 800px) {
+      #action {
+        height: 100%;
+      }
+    }
+    @media (orientation: portrait) {
+      #action {
+        width: 100%;
       }
     }
     .note {

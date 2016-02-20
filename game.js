@@ -64,7 +64,6 @@
 	    this.scale.pageAlignHorizontally = true;
 	    this.scale.pageAlignVertically = true;
 	    this.scale.setScreenSize = true;
-	    this.scale.aspectRatio = 4 / 3;
 	    return this.state.start('menu');
 	  }
 	}, true);
@@ -758,7 +757,12 @@
 	    this.load.spritesheet('star', 'assets/stars.png', 24, 22);
 	    this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
 	    this.load.spritesheet('diamond', 'assets/weapon.png', 64, 64);
-	    return this.load.image('road-light', 'assets/road-light.png');
+	    this.load.image('road-light', 'assets/road-light.png');
+	    if (!this.game.device.desktop) {
+	      this.load.image('right', 'assets/right.png');
+	      this.load.image('left', 'assets/left.png');
+	      return this.load.image('up', 'assets/up.png');
+	    }
 	  };
 
 	  StarEscapeState.prototype.create = function() {
@@ -779,7 +783,6 @@
 	      roadlight = roadlights.create(roadlight_x, roadlight_y, 'road-light');
 	      roadlight.anchor.setTo(0.5, 1);
 	      roadlight.body.immovable = true;
-	      roadlight.bounds;
 	    }
 	    player = new Player(this);
 	    this.character.player = player.sprite;
@@ -792,7 +795,87 @@
 	      star = new Star(this, stars, star_x, star_y, star_scale);
 	    }
 	    this.playerStatus.init(this, player);
-	    this.cursors = this.input.keyboard.createCursorKeys();
+	    this.control = {
+	      left: false,
+	      right: false,
+	      up: false
+	    };
+	    if (this.game.device.desktop) {
+	      this.cursors = this.input.keyboard.createCursorKeys();
+	    } else {
+	      this.jump_btn = this.add.sprite(10, this.world.height - 30, 'up');
+	      this.jump_btn.alpha = 0.5;
+	      this.jump_btn.anchor.setTo(0, 1);
+	      this.jump_btn.inputEnabled = true;
+	      this.jump_btn.events.onInputOver.add((function(_this) {
+	        return function() {
+	          return _this.control.up = true;
+	        };
+	      })(this));
+	      this.jump_btn.events.onInputDown.add((function(_this) {
+	        return function() {
+	          return _this.control.up = true;
+	        };
+	      })(this));
+	      this.jump_btn.events.onInputOut.add((function(_this) {
+	        return function() {
+	          return _this.control.up = false;
+	        };
+	      })(this));
+	      this.jump_btn.events.onInputUp.add((function(_this) {
+	        return function() {
+	          return _this.control.up = false;
+	        };
+	      })(this));
+	      this.left_btn = this.add.sprite(this.world.width - 110, this.world.height - 30, 'left');
+	      this.left_btn.alpha = 0.5;
+	      this.left_btn.anchor.setTo(1, 1);
+	      this.left_btn.inputEnabled = true;
+	      this.left_btn.events.onInputOver.add((function(_this) {
+	        return function() {
+	          return _this.control.left = true;
+	        };
+	      })(this));
+	      this.left_btn.events.onInputDown.add((function(_this) {
+	        return function() {
+	          return _this.control.left = true;
+	        };
+	      })(this));
+	      this.left_btn.events.onInputOut.add((function(_this) {
+	        return function() {
+	          return _this.control.left = false;
+	        };
+	      })(this));
+	      this.left_btn.events.onInputUp.add((function(_this) {
+	        return function() {
+	          return _this.control.left = false;
+	        };
+	      })(this));
+	      this.right_btn = this.add.sprite(this.world.width - 30, this.world.height - 30, 'right');
+	      this.right_btn.alpha = 0.5;
+	      this.right_btn.anchor.setTo(1, 1);
+	      this.right_btn.inputEnabled = true;
+	      this.right_btn.events.onInputOver.add((function(_this) {
+	        return function() {
+	          return _this.control.right = true;
+	        };
+	      })(this));
+	      this.right_btn.events.onInputDown.add((function(_this) {
+	        return function() {
+	          return _this.control.right = true;
+	        };
+	      })(this));
+	      this.right_btn.events.onInputOut.add((function(_this) {
+	        return function() {
+	          return _this.control.right = false;
+	        };
+	      })(this));
+	      this.right_btn.events.onInputUp.add((function(_this) {
+	        return function() {
+	          return _this.control.right = false;
+	        };
+	      })(this));
+	    }
 	    this.overlay = this.make.graphics(0, 0);
 	    this.overlay.beginFill('#000', 1);
 	    this.overlay.drawRect(0, 0, 800, 600);
@@ -801,9 +884,18 @@
 	    return this.gameover = false;
 	  };
 
+	  StarEscapeState.prototype._processInputs = function() {
+	    if (this.game.device.desktop) {
+	      this.control.left = this.cursors.left.isDown;
+	      this.control.right = this.cursors.right.isDown;
+	      return this.control.up = this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR);
+	    }
+	  };
+
 	  StarEscapeState.prototype._gameUpdate = function() {
 	    var fighting, j, k, len, len1, lighted, platforms, player, ref, ref1, ref2, roadlights, star, stars;
 	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
+	    this._processInputs();
 	    this.physics.arcade.overlap(stars, stars, function(star1, star2) {
 	      if (star1 !== star2) {
 	        star1.kill();
@@ -828,22 +920,16 @@
 	    this.playerStatus.update(player.agent);
 	    player.agent.stop();
 	    switch (false) {
-	      case !this.cursors.left.isDown:
+	      case !this.control.left:
 	        player.agent.walkLeft();
 	        break;
-	      case !this.cursors.right.isDown:
+	      case !this.control.right:
 	        player.agent.walkRight();
 	        break;
 	      case !!fighting:
 	        player.agent.still();
 	    }
-	    if (this.cursors.up.isDown) {
-	      player.agent.chop();
-	    }
-	    if (this.cursors.down.isDown) {
-	      player.agent.cutoff();
-	    }
-	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	    if (this.control.up) {
 	      player.agent.jump();
 	    }
 	    player.agent.update(this.character);

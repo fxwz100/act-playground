@@ -28,6 +28,11 @@ module.exports = class StarEscapeState
     @load.spritesheet 'diamond', 'assets/weapon.png', 64, 64
     @load.image 'road-light', 'assets/road-light.png'
 
+    unless @game.device.desktop
+      @load.image 'right', 'assets/right.png'
+      @load.image 'left', 'assets/left.png'
+      @load.image 'up', 'assets/up.png'
+
   create: ->
     @physics.startSystem Phaser.Physics.ARCADE
 
@@ -53,7 +58,6 @@ module.exports = class StarEscapeState
       roadlight = roadlights.create roadlight_x, roadlight_y, 'road-light'
       roadlight.anchor.setTo 0.5, 1
       roadlight.body.immovable = yes
-      roadlight.bounds
 
     # create the characters
 
@@ -73,7 +77,40 @@ module.exports = class StarEscapeState
 
     @playerStatus.init @, player
 
-    @cursors = @input.keyboard.createCursorKeys()
+    @control =
+      left: no
+      right: no
+      up: no
+
+    if @game.device.desktop
+      @cursors = @input.keyboard.createCursorKeys()
+    else
+      @jump_btn = @add.sprite 10, @world.height - 30, 'up'
+      @jump_btn.alpha = 0.5
+      @jump_btn.anchor.setTo 0, 1
+      @jump_btn.inputEnabled  = yes
+      @jump_btn.events.onInputOver.add => @control.up = yes
+      @jump_btn.events.onInputDown.add => @control.up = yes
+      @jump_btn.events.onInputOut.add => @control.up = no
+      @jump_btn.events.onInputUp.add => @control.up = no
+
+      @left_btn = @add.sprite @world.width - 110, @world.height - 30, 'left'
+      @left_btn.alpha = 0.5
+      @left_btn.anchor.setTo 1, 1
+      @left_btn.inputEnabled = yes
+      @left_btn.events.onInputOver.add => @control.left = yes
+      @left_btn.events.onInputDown.add => @control.left = yes
+      @left_btn.events.onInputOut.add => @control.left = no
+      @left_btn.events.onInputUp.add => @control.left = no
+
+      @right_btn = @add.sprite @world.width - 30, @world.height - 30, 'right'
+      @right_btn.alpha = 0.5
+      @right_btn.anchor.setTo 1, 1
+      @right_btn.inputEnabled = yes
+      @right_btn.events.onInputOver.add => @control.right = yes
+      @right_btn.events.onInputDown.add => @control.right = yes
+      @right_btn.events.onInputOut.add => @control.right = no
+      @right_btn.events.onInputUp.add => @control.right = no
 
     # create the overlay for end animation.
     @overlay = @make.graphics 0, 0
@@ -84,9 +121,17 @@ module.exports = class StarEscapeState
 
     @gameover = no
 
+  _processInputs: ->
+    if @game.device.desktop
+      @control.left = @cursors.left.isDown
+      @control.right = @cursors.right.isDown
+      @control.up = @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+
   # updates specific to game logic.
   _gameUpdate: ->
     {player, stars, platforms, roadlights} = @character
+
+    @_processInputs()
 
     @physics.arcade.overlap stars, stars, (star1, star2) ->
       if star1 isnt star2
@@ -110,21 +155,15 @@ module.exports = class StarEscapeState
 
     # detect left/right moving.
     switch
-      when @cursors.left.isDown
+      when @control.left
         player.agent.walkLeft()
-      when @cursors.right.isDown
+      when @control.right
         player.agent.walkRight()
       when not fighting
         player.agent.still()
 
-    if @cursors.up.isDown
-      player.agent.chop()
-
-    if @cursors.down.isDown
-      player.agent.cutoff()
-
     # track jumping
-    if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+    if @control.up
       player.agent.jump()
 
     player.agent.update @character
