@@ -84,75 +84,80 @@ module.exports = class StarEscapeState
 
     @gameover = no
 
+  # updates specific to game logic.
+  _gameUpdate: ->
+    {player, stars, platforms, roadlights} = @character
+    
+    @physics.arcade.overlap stars, stars, (star1, star2) ->
+      if star1 isnt star2
+        star1.kill()
+        star2.kill()
+
+    fighting = @physics.arcade.overlap player, stars, (player, star) ->
+      star.agent.fight player.agent
+      player.agent.fight star.agent
+    , null, @
+
+    lighted = @game.physics.arcade.overlap player, roadlights
+
+    for star in stars.children
+      unless star.body.allowGravity = not lighted
+        star.body.velocity = x: 0, y: 0
+
+    @playerStatus.update player.agent
+
+    player.agent.stop()
+
+    # detect left/right moving.
+    switch
+      when @cursors.left.isDown
+        player.agent.walkLeft()
+      when @cursors.right.isDown
+        player.agent.walkRight()
+      when not fighting
+        player.agent.still()
+
+    if @cursors.up.isDown
+      player.agent.chop()
+
+    if @cursors.down.isDown
+      player.agent.cutoff()
+
+    # track jumping
+    if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
+      player.agent.jump()
+
+    player.agent.update @character
+    for star in stars.children
+      star.agent.update @character
+
+    if player.agent.props.hp < 0
+      @world.addChild @overlay
+
+      @add.tween @overlay
+      .from alpha: 0, 1000
+      .start()
+
+      player.agent.kill =>
+        @state.start @over_state, yes, no, @character
+
+      @gameover = yes
+
+    else if player.x > @world.width
+      @world.addChild @overlay
+
+      @add.tween @overlay
+      .from alpha: 0, 1000
+      .start()
+      .onComplete.add =>
+        @state.start @pass_state, yes, no, @character
+
+      @gameover = yes
+
   update: ->
     {player, stars, platforms, roadlights} = @character
 
     @physics.arcade.collide player, platforms
     @physics.arcade.collide stars, platforms
 
-    @physics.arcade.overlap stars, stars, (star1, star2) ->
-      if star1 isnt star2
-        star1.kill()
-        star2.kill()
-
-    unless @gameover
-      fighting = @physics.arcade.overlap player, stars, (player, star) ->
-        star.agent.fight player.agent
-        player.agent.fight star.agent
-      , null, @
-
-      lighted = @game.physics.arcade.overlap player, roadlights
-
-      for star in stars.children
-        unless star.body.allowGravity = not lighted
-          star.body.velocity = x: 0, y: 0
-
-      @playerStatus.update player.agent
-
-      player.agent.stop()
-
-      # detect left/right moving.
-      switch
-        when @cursors.left.isDown
-          player.agent.walkLeft()
-        when @cursors.right.isDown
-          player.agent.walkRight()
-        when not fighting
-          player.agent.still()
-
-      if @cursors.up.isDown
-        player.agent.chop()
-
-      if @cursors.down.isDown
-        player.agent.cutoff()
-
-      # track jumping
-      if @input.keyboard.isDown Phaser.KeyCode.SPACEBAR
-        player.agent.jump()
-
-      player.agent.update @character
-      for star in stars.children
-        star.agent.update @character
-
-      if player.agent.props.hp < 0
-        @world.addChild @overlay
-
-        @add.tween @overlay
-        .from alpha: 0, 1000
-        .start()
-
-        player.agent.kill =>
-          @state.start @over_state, yes, no, @character
-
-        @gameover = yes
-
-      else if player.x > @world.width
-        @world.addChild @overlay
-
-        @add.tween @overlay
-        .from alpha: 0, 1000
-        .start()
-        .onComplete.add =>
-          @state.start @pass_state, yes, no, @character
-
-        @gameover = yes
+    @_gameUpdate() unless @gameover

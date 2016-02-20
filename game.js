@@ -801,82 +801,88 @@
 	    return this.gameover = false;
 	  };
 
-	  StarEscapeState.prototype.update = function() {
+	  StarEscapeState.prototype._gameUpdate = function() {
 	    var fighting, j, k, len, len1, lighted, platforms, player, ref, ref1, ref2, roadlights, star, stars;
 	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
-	    this.physics.arcade.collide(player, platforms);
-	    this.physics.arcade.collide(stars, platforms);
 	    this.physics.arcade.overlap(stars, stars, function(star1, star2) {
 	      if (star1 !== star2) {
 	        star1.kill();
 	        return star2.kill();
 	      }
 	    });
+	    fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
+	      star.agent.fight(player.agent);
+	      return player.agent.fight(star.agent);
+	    }, null, this);
+	    lighted = this.game.physics.arcade.overlap(player, roadlights);
+	    ref1 = stars.children;
+	    for (j = 0, len = ref1.length; j < len; j++) {
+	      star = ref1[j];
+	      if (!(star.body.allowGravity = !lighted)) {
+	        star.body.velocity = {
+	          x: 0,
+	          y: 0
+	        };
+	      }
+	    }
+	    this.playerStatus.update(player.agent);
+	    player.agent.stop();
+	    switch (false) {
+	      case !this.cursors.left.isDown:
+	        player.agent.walkLeft();
+	        break;
+	      case !this.cursors.right.isDown:
+	        player.agent.walkRight();
+	        break;
+	      case !!fighting:
+	        player.agent.still();
+	    }
+	    if (this.cursors.up.isDown) {
+	      player.agent.chop();
+	    }
+	    if (this.cursors.down.isDown) {
+	      player.agent.cutoff();
+	    }
+	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	      player.agent.jump();
+	    }
+	    player.agent.update(this.character);
+	    ref2 = stars.children;
+	    for (k = 0, len1 = ref2.length; k < len1; k++) {
+	      star = ref2[k];
+	      star.agent.update(this.character);
+	    }
+	    if (player.agent.props.hp < 0) {
+	      this.world.addChild(this.overlay);
+	      this.add.tween(this.overlay).from({
+	        alpha: 0
+	      }, 1000).start();
+	      player.agent.kill((function(_this) {
+	        return function() {
+	          return _this.state.start(_this.over_state, true, false, _this.character);
+	        };
+	      })(this));
+	      return this.gameover = true;
+	    } else if (player.x > this.world.width) {
+	      this.world.addChild(this.overlay);
+	      this.add.tween(this.overlay).from({
+	        alpha: 0
+	      }, 1000).start().onComplete.add((function(_this) {
+	        return function() {
+	          return _this.state.start(_this.pass_state, true, false, _this.character);
+	        };
+	      })(this));
+	      return this.gameover = true;
+	    }
+	  };
+
+	  StarEscapeState.prototype.update = function() {
+	    var platforms, player, ref, roadlights, stars;
+	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
+	    this.physics.arcade.collide(player, platforms);
+	    this.physics.arcade.collide(stars, platforms);
 	    if (!this.gameover) {
-	      fighting = this.physics.arcade.overlap(player, stars, function(player, star) {
-	        star.agent.fight(player.agent);
-	        return player.agent.fight(star.agent);
-	      }, null, this);
-	      lighted = this.game.physics.arcade.overlap(player, roadlights);
-	      ref1 = stars.children;
-	      for (j = 0, len = ref1.length; j < len; j++) {
-	        star = ref1[j];
-	        if (!(star.body.allowGravity = !lighted)) {
-	          star.body.velocity = {
-	            x: 0,
-	            y: 0
-	          };
-	        }
-	      }
-	      this.playerStatus.update(player.agent);
-	      player.agent.stop();
-	      switch (false) {
-	        case !this.cursors.left.isDown:
-	          player.agent.walkLeft();
-	          break;
-	        case !this.cursors.right.isDown:
-	          player.agent.walkRight();
-	          break;
-	        case !!fighting:
-	          player.agent.still();
-	      }
-	      if (this.cursors.up.isDown) {
-	        player.agent.chop();
-	      }
-	      if (this.cursors.down.isDown) {
-	        player.agent.cutoff();
-	      }
-	      if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-	        player.agent.jump();
-	      }
-	      player.agent.update(this.character);
-	      ref2 = stars.children;
-	      for (k = 0, len1 = ref2.length; k < len1; k++) {
-	        star = ref2[k];
-	        star.agent.update(this.character);
-	      }
-	      if (player.agent.props.hp < 0) {
-	        this.world.addChild(this.overlay);
-	        this.add.tween(this.overlay).from({
-	          alpha: 0
-	        }, 1000).start();
-	        player.agent.kill((function(_this) {
-	          return function() {
-	            return _this.state.start(_this.over_state, true, false, _this.character);
-	          };
-	        })(this));
-	        return this.gameover = true;
-	      } else if (player.x > this.world.width) {
-	        this.world.addChild(this.overlay);
-	        this.add.tween(this.overlay).from({
-	          alpha: 0
-	        }, 1000).start().onComplete.add((function(_this) {
-	          return function() {
-	            return _this.state.start(_this.pass_state, true, false, _this.character);
-	          };
-	        })(this));
-	        return this.gameover = true;
-	      }
+	      return this._gameUpdate();
 	    }
 	  };
 
