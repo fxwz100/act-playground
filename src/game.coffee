@@ -1,6 +1,7 @@
 StarEscapeState = require './state/star/escape'
 WelcomeState = require './state/start'
-OverState = require './state/end'
+EndState = require './state/end'
+TempState = require './state/temp'
 Narrator = require './state/narrator'
 
 game = new Phaser.Game 800, 600, Phaser.AUTO, 'action'
@@ -75,7 +76,7 @@ game.state.add 'star-1', new Narrator
     {description: text: '我被星星砸死了？'}
     {description: text: '可是我还有一个梦想啊。'}
   ]
-  next_state: 'end'
+  next_state: 'temp'
 
 game.state.add 'star-2', new Narrator
   scripts:[
@@ -95,4 +96,10 @@ game.state.add 'star-2', new Narrator
   ]
   next_state: 'end'
 
-game.state.add 'end', new OverState(restart_state: 'star', menu_state: 'menu')
+game.state.add 'temp', new TempState
+  description: '再来一次吧？'
+  menu_state: 'menu'
+
+game.state.add 'end', new EndState
+  description: '后续更新请持续关注github吧 :)'
+  menu_state: 'menu'

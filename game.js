@@ -44,13 +44,15 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Narrator, OverState, StarEscapeState, WelcomeState, game;
+	var EndState, Narrator, StarEscapeState, TempState, WelcomeState, game;
 
 	StarEscapeState = __webpack_require__(10);
 
 	WelcomeState = __webpack_require__(7);
 
-	OverState = __webpack_require__(8);
+	EndState = __webpack_require__(8);
+
+	TempState = __webpack_require__(12);
 
 	Narrator = __webpack_require__(6);
 
@@ -194,7 +196,7 @@
 	      }
 	    }
 	  ],
-	  next_state: 'end'
+	  next_state: 'temp'
 	}));
 
 	game.state.add('star-2', new Narrator({
@@ -221,8 +223,13 @@
 	  next_state: 'end'
 	}));
 
-	game.state.add('end', new OverState({
-	  restart_state: 'star',
+	game.state.add('temp', new TempState({
+	  description: '再来一次吧？',
+	  menu_state: 'menu'
+	}));
+
+	game.state.add('end', new EndState({
+	  description: '后续更新请持续关注github吧 :)',
 	  menu_state: 'menu'
 	}));
 
@@ -644,26 +651,24 @@
 /* 8 */
 /***/ function(module, exports) {
 
-	var OverState;
+	var EndState;
 
-	module.exports = OverState = (function() {
-	  OverState.prototype.name = 'over';
-
-	  function OverState(arg) {
-	    this.restart_state = arg.restart_state, this.menu_state = arg.menu_state;
+	module.exports = EndState = (function() {
+	  function EndState(arg) {
+	    this.description = arg.description, this.menu_state = arg.menu_state;
 	  }
 
-	  OverState.prototype.init = function(character) {
+	  EndState.prototype.init = function(character) {
 	    this.character = character;
 	  };
 
-	  OverState.prototype.preload = function() {
+	  EndState.prototype.preload = function() {
 	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
 	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
 	  };
 
-	  OverState.prototype.create = function() {
-	    var menu_btn, restart_btn, text_x, text_y;
+	  EndState.prototype.create = function() {
+	    var menu_btn, text_x, text_y;
 	    this.overlay = this.add.graphics(0, 0);
 	    this.overlay.beginFill('#000', 1);
 	    this.overlay.drawRect(0, 0, 800, 600);
@@ -674,7 +679,7 @@
 	    }).start();
 	    text_x = this.world.centerX;
 	    text_y = this.world.centerY;
-	    this.text = this.add.text(text_x, text_y, '后续更新请持续关注github吧 :)', {
+	    this.text = this.add.text(text_x, text_y, this.description, {
 	      fontSize: '32px',
 	      fill: '#fff'
 	    });
@@ -682,20 +687,7 @@
 	    this.add.tween(this.text).from({
 	      alpha: 0
 	    }).start();
-	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'restart-btn', (function(_this) {
-	      return function() {
-	        return _this.state.start(_this.restart_state);
-	      };
-	    })(this), this, 1, 0);
-	    restart_btn.anchor.setTo(0.5, 0.5);
-	    this.add.tween(restart_btn).from({
-	      alpha: 0
-	    }).start();
-	    this.add.tween(restart_btn.scale).from({
-	      x: 2,
-	      y: 2
-	    }, 1000, Phaser.Easing.Bounce.Out).start();
-	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'menu-btn', (function(_this) {
+	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'menu-btn', (function(_this) {
 	      return function() {
 	        return _this.state.start(_this.menu_state);
 	      };
@@ -710,7 +702,7 @@
 	    }, 1000, Phaser.Easing.Bounce.Out).start();
 	  };
 
-	  OverState.prototype.update = function() {
+	  EndState.prototype.update = function() {
 	    var platforms, player, ref, roadlights, stars, weapon;
 	    if (this.character) {
 	      ref = this.character, player = ref.player, weapon = ref.weapon, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
@@ -720,7 +712,7 @@
 	    }
 	  };
 
-	  return OverState;
+	  return EndState;
 
 	})();
 
@@ -891,6 +883,91 @@
 	  };
 
 	  return StarPlayState;
+
+	})();
+
+
+/***/ },
+/* 11 */,
+/* 12 */
+/***/ function(module, exports) {
+
+	var TempState;
+
+	module.exports = TempState = (function() {
+	  function TempState(arg) {
+	    this.description = arg.description, this.menu_state = arg.menu_state;
+	  }
+
+	  TempState.prototype.init = function(character, restart_state) {
+	    this.character = character;
+	    this.restart_state = restart_state;
+	  };
+
+	  TempState.prototype.preload = function() {
+	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
+	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
+	  };
+
+	  TempState.prototype.create = function() {
+	    var menu_btn, restart_btn, text_x, text_y;
+	    this.overlay = this.add.graphics(0, 0);
+	    this.overlay.beginFill('#000', 1);
+	    this.overlay.drawRect(0, 0, 800, 600);
+	    this.overlay.endFill();
+	    this.overlay.alpha = 0.7;
+	    this.add.tween(this.overlay).from({
+	      alpha: 0
+	    }).start();
+	    text_x = this.world.centerX;
+	    text_y = this.world.centerY;
+	    this.text = this.add.text(text_x, text_y, this.description, {
+	      fontSize: '32px',
+	      fill: '#fff'
+	    });
+	    this.text.anchor.setTo(0.5, 0.5);
+	    this.add.tween(this.text).from({
+	      alpha: 0
+	    }).start();
+	    restart_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'restart-btn', (function(_this) {
+	      return function() {
+	        return _this.state.start(_this.restart_state);
+	      };
+	    })(this), this, 1, 0);
+	    restart_btn.anchor.setTo(0.5, 0.5);
+	    this.add.tween(restart_btn).from({
+	      alpha: 0
+	    }).start();
+	    this.add.tween(restart_btn.scale).from({
+	      x: 2,
+	      y: 2
+	    }, 1000, Phaser.Easing.Bounce.Out).start();
+	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'menu-btn', (function(_this) {
+	      return function() {
+	        return _this.state.start(_this.menu_state);
+	      };
+	    })(this), this, 1, 0);
+	    menu_btn.anchor.setTo(0.5, 0.5);
+	    this.add.tween(menu_btn).from({
+	      alpha: 0
+	    }).start();
+	    return this.add.tween(menu_btn.scale).from({
+	      x: 2,
+	      y: 2
+	    }, 1000, Phaser.Easing.Bounce.Out).start();
+	  };
+
+	  TempState.prototype.update = function() {
+	    var platforms, player, ref, roadlights, stars, weapon;
+	    if (this.character) {
+	      ref = this.character, player = ref.player, weapon = ref.weapon, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
+	      this.physics.arcade.collide(player, platforms);
+	      this.physics.arcade.collide(stars, platforms);
+	      return this.physics.arcade.collide(stars, roadlights);
+	    }
+	  };
+
+	  return TempState;
 
 	})();
 

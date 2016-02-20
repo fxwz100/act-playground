@@ -1,9 +1,9 @@
-# The game over state.
-module.exports = class EndState
+# Temporary end state.
+module.exports = class TempState
 
   constructor: ({@description, @menu_state}) ->
 
-  init: (@character) ->
+  init: (@character, @restart_state) ->
 
   preload: ->
     @load.spritesheet 'restart-btn', 'assets/restart-btn.png', 120, 35
@@ -34,7 +34,20 @@ module.exports = class EndState
     .start()
 
     # add button
-    menu_btn = @add.button @world.centerX, @world.centerY + 100, 'menu-btn', =>
+    restart_btn = @add.button @world.centerX, @world.centerY + 100, 'restart-btn', =>
+      @state.start @restart_state
+    , @, 1, 0
+    restart_btn.anchor.setTo 0.5, 0.5
+
+    @add.tween restart_btn
+    .from alpha: 0
+    .start()
+    @add.tween restart_btn.scale
+    .from x: 2, y: 2, 1000, Phaser.Easing.Bounce.Out
+    .start()
+
+    # add button
+    menu_btn = @add.button @world.centerX, @world.centerY + 160, 'menu-btn', =>
       @state.start @menu_state
     , @, 1, 0
     menu_btn.anchor.setTo 0.5, 0.5
