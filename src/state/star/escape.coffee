@@ -1,8 +1,9 @@
 Player = require '../../agent/player'
 Star  = require '../../agent/star'
 
-context =
-  # components
+
+module.exports = class StarEscapeState
+
   playerStatus:
     textify: (player) -> "HP: #{player.props.hp}\nMP: #{player.state.mp}"
     init: (game, player) ->
@@ -11,15 +12,13 @@ context =
         fill: '#fff'
     update: (player) ->
       @sprite.text = @textify player
-  # utilities
+
   cursors: null
-  # state
-  state: 'play'
-
-
-module.exports = class StarPlayState
 
   constructor: ({@over_state, @pass_state}) ->
+
+  init: ->
+    @state.lastPlayed = @state.current
 
   preload: ->
     @load.image 'game-background', 'assets/game-bg.png'
@@ -72,7 +71,7 @@ module.exports = class StarPlayState
 
     # create the utilties and context
 
-    context.playerStatus.init @, player
+    @playerStatus.init @, player
 
     @cursors = @input.keyboard.createCursorKeys()
 
@@ -108,7 +107,7 @@ module.exports = class StarPlayState
         unless star.body.allowGravity = not lighted
           star.body.velocity = x: 0, y: 0
 
-      context.playerStatus.update player.agent
+      @playerStatus.update player.agent
 
       player.agent.stop()
 
@@ -143,7 +142,6 @@ module.exports = class StarPlayState
         .start()
 
         player.agent.kill =>
-          @state.lastPlayed = @state.current
           @state.start @over_state, yes, no, @character
 
         @gameover = yes

@@ -66,14 +66,7 @@ game.state.add 'star-init', new StarEscapeState
 
 game.state.add 'star-1', new Narrator
   scripts:[
-    {
-      description:
-        text: '纳尼？！什么鬼'
-        y: 450
-      image:
-        name: 'welcome-bg'
-        url: 'assets/welcome-bg.png'
-    }
+    {description: text: '纳尼？！什么鬼'}
     {description: text: '我被星星砸死了？'}
     {description: text: '可是我还有一个梦想啊。'}
   ]

@@ -182,12 +182,7 @@
 	  scripts: [
 	    {
 	      description: {
-	        text: '纳尼？！什么鬼',
-	        y: 450
-	      },
-	      image: {
-	        name: 'welcome-bg',
-	        url: 'assets/welcome-bg.png'
+	        text: '纳尼？！什么鬼'
 	      }
 	    }, {
 	      description: {
@@ -725,14 +720,14 @@
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Player, Star, StarPlayState, context;
+	var Player, Star, StarEscapeState;
 
 	Player = __webpack_require__(2);
 
 	Star = __webpack_require__(3);
 
-	context = {
-	  playerStatus: {
+	module.exports = StarEscapeState = (function() {
+	  StarEscapeState.prototype.playerStatus = {
 	    textify: function(player) {
 	      return "HP: " + player.props.hp + "\nMP: " + player.state.mp;
 	    },
@@ -745,17 +740,19 @@
 	    update: function(player) {
 	      return this.sprite.text = this.textify(player);
 	    }
-	  },
-	  cursors: null,
-	  state: 'play'
-	};
+	  };
 
-	module.exports = StarPlayState = (function() {
-	  function StarPlayState(arg) {
+	  StarEscapeState.prototype.cursors = null;
+
+	  function StarEscapeState(arg) {
 	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
 	  }
 
-	  StarPlayState.prototype.preload = function() {
+	  StarEscapeState.prototype.init = function() {
+	    return this.state.lastPlayed = this.state.current;
+	  };
+
+	  StarEscapeState.prototype.preload = function() {
 	    this.load.image('game-background', 'assets/game-bg.png');
 	    this.load.image('ground', 'assets/ground.png');
 	    this.load.spritesheet('star', 'assets/stars.png', 24, 22);
@@ -764,7 +761,7 @@
 	    return this.load.image('road-light', 'assets/road-light.png');
 	  };
 
-	  StarPlayState.prototype.create = function() {
+	  StarEscapeState.prototype.create = function() {
 	    var ground, i, j, k, platforms, player, roadlight, roadlight_x, roadlight_y, roadlights, star, star_scale, star_x, star_y, stars;
 	    this.physics.startSystem(Phaser.Physics.ARCADE);
 	    this.character = {};
@@ -794,7 +791,7 @@
 	      star_scale = 0.5 + 0.5 * Math.random();
 	      star = new Star(this, stars, star_x, star_y, star_scale);
 	    }
-	    context.playerStatus.init(this, player);
+	    this.playerStatus.init(this, player);
 	    this.cursors = this.input.keyboard.createCursorKeys();
 	    this.overlay = this.make.graphics(0, 0);
 	    this.overlay.beginFill('#000', 1);
@@ -804,7 +801,7 @@
 	    return this.gameover = false;
 	  };
 
-	  StarPlayState.prototype.update = function() {
+	  StarEscapeState.prototype.update = function() {
 	    var fighting, j, k, len, len1, lighted, platforms, player, ref, ref1, ref2, roadlights, star, stars;
 	    ref = this.character, player = ref.player, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
 	    this.physics.arcade.collide(player, platforms);
@@ -831,7 +828,7 @@
 	          };
 	        }
 	      }
-	      context.playerStatus.update(player.agent);
+	      this.playerStatus.update(player.agent);
 	      player.agent.stop();
 	      switch (false) {
 	        case !this.cursors.left.isDown:
@@ -865,7 +862,6 @@
 	        }, 1000).start();
 	        player.agent.kill((function(_this) {
 	          return function() {
-	            _this.state.lastPlayed = _this.state.current;
 	            return _this.state.start(_this.over_state, true, false, _this.character);
 	          };
 	        })(this));
@@ -884,7 +880,7 @@
 	    }
 	  };
 
-	  return StarPlayState;
+	  return StarEscapeState;
 
 	})();
 
@@ -907,16 +903,14 @@
 
 	  TempState.prototype.preload = function() {
 	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
-	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
+	    this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
+	    return this.load.image('girl', 'assets/girl.jpg');
 	  };
 
 	  TempState.prototype.create = function() {
 	    var menu_btn, restart_btn, text_x, text_y;
-	    this.overlay = this.add.graphics(0, 0);
-	    this.overlay.beginFill('#000', 1);
-	    this.overlay.drawRect(0, 0, 800, 600);
-	    this.overlay.endFill();
-	    this.overlay.alpha = 0.7;
+	    this.overlay = this.add.sprite(0, 0, 'girl');
+	    this.overlay.alpha = 0.3;
 	    this.add.tween(this.overlay).from({
 	      alpha: 0
 	    }).start();

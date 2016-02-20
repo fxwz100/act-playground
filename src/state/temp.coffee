@@ -8,14 +8,11 @@ module.exports = class TempState
   preload: ->
     @load.spritesheet 'restart-btn', 'assets/restart-btn.png', 120, 35
     @load.spritesheet 'menu-btn', 'assets/menu-btn.png', 120, 35
+    @load.image 'girl', 'assets/girl.jpg'
 
   create: ->
-    # add overlay
-    @overlay = @add.graphics 0, 0
-    @overlay.beginFill '#000', 1
-    @overlay.drawRect 0, 0, 800, 600
-    @overlay.endFill()
-    @overlay.alpha = 0.7
+    @overlay = @add.sprite 0, 0, 'girl'
+    @overlay.alpha = 0.3
 
     @add.tween @overlay
     .from alpha: 0
