@@ -25,7 +25,7 @@ module.exports = class EndState
     text_x = @world.centerX
     text_y = @world.centerY
     @text = @add.text text_x, text_y, @description,
-      fontSize: '32px'
+      fontSize: '32pt'
       fill: '#fff'
     @text.anchor.setTo 0.5, 0.5
 

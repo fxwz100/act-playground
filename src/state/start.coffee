@@ -1,7 +1,5 @@
 module.exports = class WelcomeState
 
-  name: 'welcome'
-
   constructor: ({@next_state}) ->
 
   preload: ->
