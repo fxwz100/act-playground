@@ -9,7 +9,7 @@ module.exports = class Player
     @game.physics.arcade.enable @sprite
     @sprite.body.bounce.y = 0.2
     @sprite.body.gravity.y = 800
-    @sprite.body.collideWorldBounds = off
+    @sprite.body.collideWorldBounds = yes
 
     # animations
     @sprite.animations.add 'left', [0, 1, 2, 3], 10, on

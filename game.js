@@ -46,15 +46,15 @@
 
 	var EndState, Narrator, StarEscapeState, TempState, WelcomeState, game;
 
-	StarEscapeState = __webpack_require__(10);
+	StarEscapeState = __webpack_require__(1);
 
-	WelcomeState = __webpack_require__(7);
+	WelcomeState = __webpack_require__(4);
 
-	EndState = __webpack_require__(8);
+	EndState = __webpack_require__(5);
 
-	TempState = __webpack_require__(12);
+	TempState = __webpack_require__(6);
 
-	Narrator = __webpack_require__(6);
+	Narrator = __webpack_require__(7);
 
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'action');
 
@@ -232,491 +232,7 @@
 
 
 /***/ },
-/* 1 */,
-/* 2 */
-/***/ function(module, exports) {
-
-	var Player;
-
-	module.exports = Player = (function() {
-	  function Player(game) {
-	    this.game = game;
-	    this.sprite = this.game.add.sprite(32, this.game.world.height - 150, 'dude', 0);
-	    this.game.physics.arcade.enable(this.sprite);
-	    this.sprite.body.bounce.y = 0.2;
-	    this.sprite.body.gravity.y = 800;
-	    this.sprite.body.collideWorldBounds = false;
-	    this.sprite.animations.add('left', [0, 1, 2, 3], 10, true);
-	    this.sprite.animations.add('right', [5, 6, 7, 8], 10, true);
-	    this.sprite.animations.add('common-attack-left', [0, 1, 2, 3], 10, true);
-	    this.sprite.animations.add('common-attack-right', [5, 6, 7, 8], 10, true);
-	    this.sprite.agent = this;
-	    this.reset();
-	  }
-
-	  Player.prototype.reset = function() {
-	    this.props = {
-	      hp: 10,
-	      mp: 20,
-	      sp: 10,
-	      ht: 400,
-	      at: 10
-	    };
-	    this.state = {
-	      sp: -1,
-	      mp: this.props.mp
-	    };
-	    this.sprite.x = 32;
-	    this.sprite.y = this.game.world.height - 150;
-	    this.sprite.angle = 0;
-	    return this.sprite.anchor.setTo(0.5, 1);
-	  };
-
-	  Player.prototype.update = function() {
-	    this.state.sp = (this.state.sp + 1) % this.props.sp;
-	    if (this.state.mp < this.props.mp) {
-	      return this.state.mp = (this.state.mp + 1) % (this.props.mp + 1);
-	    }
-	  };
-
-	  Player.prototype.walkLeft = function() {
-	    this.sprite.animations.play('left');
-	    return this.sprite.body.velocity.x = -150;
-	  };
-
-	  Player.prototype.walkRight = function() {
-	    this.sprite.animations.play('right');
-	    return this.sprite.body.velocity.x = 150;
-	  };
-
-	  Player.prototype.jump = function() {
-	    if (this.sprite.body.touching.down) {
-	      return this.sprite.body.velocity.y = -this.props.ht;
-	    }
-	  };
-
-	  Player.prototype.still = function() {
-	    this.sprite.animations.stop();
-	    if (this.sprite.deltaX > 0) {
-	      return this.sprite.frame = 5;
-	    } else if (this.sprite.deltaX < 0) {
-	      return this.sprite.frame = 0;
-	    }
-	  };
-
-	  Player.prototype.stop = function() {
-	    return this.sprite.body.velocity.x = 0;
-	  };
-
-	  Player.prototype.chop = function() {};
-
-	  Player.prototype.cutoff = function() {
-	    if (this.state.mp - 10 > 0) {
-	      this.sprite.animations.play('chop-left');
-	      return this.state.mp -= 10;
-	    }
-	  };
-
-	  Player.prototype.fight = function(Star) {
-	    var msg, msg_x, msg_y;
-	    if ((Star != null) && (Star.sprite != null)) {
-	      if (Star.sprite.x > this.sprite.x) {
-	        this.sprite.animations.play('common-attack-right');
-	      } else {
-	        this.sprite.animations.play('common-attack-left');
-	      }
-	      if (this.state.sp % this.props.sp === 0) {
-	        Star.props.hp -= this.props.at;
-	        msg_x = (this.sprite.x + Star.sprite.x) / 2;
-	        msg_y = this.sprite.y - 10;
-	        msg = this.game.add.text(msg_x, msg_y, -this.props.at, {
-	          fontSize: '12px',
-	          fill: '#fc0'
-	        });
-	        return this.game.add.tween(msg).to({
-	          y: msg.y - 100,
-	          alpha: 0
-	        }, 1000, 'Linear', true).onComplete.add(msg.kill, msg);
-	      }
-	    }
-	  };
-
-	  Player.prototype.kill = function(cb) {
-	    this.stop();
-	    this.still();
-	    this.sprite.anchor.setTo(0.5, 1);
-	    if (this.sprite.frame > 4) {
-	      this.game.add.tween(this.sprite).to({
-	        angle: -90
-	      }, 200, Phaser.Easing.Bounce.Out, true);
-	    } else {
-	      this.game.add.tween(this.sprite).to({
-	        angle: 90
-	      }, 200, Phaser.Easing.Bounce.Out, true);
-	    }
-	    if (cb) {
-	      return setTimeout(cb, 1000);
-	    }
-	  };
-
-	  return Player;
-
-	})();
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	var Star;
-
-	module.exports = Star = (function() {
-	  function Star(game, group, x, y, scale) {
-	    this.game = game;
-	    this.group = group;
-	    if (scale == null) {
-	      scale = 1;
-	    }
-	    this.sprite = this.group.create(x, y, 'star', 0);
-	    this.sprite.anchor.setTo(0.5, 0.5);
-	    this.sprite.scale.setTo(scale);
-	    this.game.add.tween(this.sprite).to({
-	      alpha: 0
-	    }, 500 + Math.random() * 500, 'Linear', true, Math.random() * 1000, -1, true);
-	    this.sprite.body.allowGravity = false;
-	    this.sprite.body.gravity.y = 300 * scale;
-	    this.sprite.body.bounce.y = 0.7 + Math.random() * 0.2;
-	    this.sprite.animations.add('fight', [1, 2], 5, true);
-	    this.sprite.agent = this;
-	    this.props = {
-	      hp: 100,
-	      sp: 5
-	    };
-	    this.state = {
-	      sp: -1
-	    };
-	  }
-
-	  Star.prototype.update = function() {
-	    return this.state.sp = (this.state.sp + 1) % this.props.sp;
-	  };
-
-	  Star.prototype.fight = function(player) {
-	    var msg, msg_x, msg_y, spark, spark_x, spark_y;
-	    if (player) {
-	      this.sprite.animations.play('fight');
-	      setTimeout((function(_this) {
-	        return function() {
-	          if (_this.props.hp > 0) {
-	            _this.sprite.animations.stop();
-	            return _this.sprite.frame = 0;
-	          } else {
-	            return _this.kill();
-	          }
-	        };
-	      })(this), 300);
-	      if (this.state.sp % this.props.sp === 0) {
-	        player.props.hp -= 1;
-	        spark_x = this.sprite.x + (player.sprite.x - this.sprite.x) * 0.5 + Math.random() * 10;
-	        spark_y = this.sprite.y + Math.random() * 10;
-	        spark = this.game.add.sprite(spark_x, spark_y, 'star', 0);
-	        spark.animations.add('spark', [1, 2], 10, true);
-	        spark.animations.play('spark');
-	        spark.scale.setTo(0.5, 0.5);
-	        this.game.add.tween(spark).to({
-	          alpha: 0
-	        }, 1000, 'Linear', true).onComplete.add(spark.kill, spark);
-	        msg_x = (this.sprite.x + player.sprite.x) / 2;
-	        msg_y = this.sprite.y - 10;
-	        msg = this.game.add.text(msg_x, msg_y, '-1', {
-	          fontSize: '12px',
-	          fill: '#f00'
-	        });
-	        return this.game.add.tween(msg).to({
-	          y: msg.y - 100,
-	          alpha: 0
-	        }, 1000, 'Linear', true).onComplete.add(msg.kill, msg);
-	      }
-	    }
-	  };
-
-	  Star.prototype.kill = function() {
-	    return this.sprite.kill();
-	  };
-
-	  return Star;
-
-	})();
-
-
-/***/ },
-/* 4 */,
-/* 5 */,
-/* 6 */
-/***/ function(module, exports) {
-
-	var NarratorState;
-
-	module.exports = NarratorState = (function() {
-	  NarratorState.prototype.name = 'narrator';
-
-	  function NarratorState(arg) {
-	    this.scripts = arg.scripts, this.next_state = arg.next_state;
-	  }
-
-	  NarratorState.prototype.next_scene = function() {
-	    this.add.tween(this.screen).to({
-	      alpha: 0
-	    }, 500).start().onComplete.add((function(_this) {
-	      return function() {
-	        return _this.state.start(_this.next_state);
-	      };
-	    })(this));
-	    return this.add.tween(this.text).to({
-	      alpha: 0
-	    }, 500).start();
-	  };
-
-	  NarratorState.prototype.preload = function() {
-	    var i, len, ref, results, script;
-	    ref = this.scripts;
-	    results = [];
-	    for (i = 0, len = ref.length; i < len; i++) {
-	      script = ref[i];
-	      if (script.image) {
-	        results.push(this.load.image(script.image.name, script.image.url));
-	      } else {
-	        results.push(void 0);
-	      }
-	    }
-	    return results;
-	  };
-
-	  NarratorState.prototype.next_dialog = function() {
-	    var script;
-	    if (!this.text_fade.isRunning) {
-	      this.index += 1;
-	      if (this.index < this.scripts.length) {
-	        script = this.scripts[this.index];
-	        if (script.image) {
-	          this.screen_fade.start();
-	        }
-	        return this.text_fade.start();
-	      } else {
-	        return this.next_scene();
-	      }
-	    }
-	  };
-
-	  NarratorState.prototype.create = function() {
-	    var current_script, ref, ref1, ref2, ref3, screen_in, skip_btn, skip_text, skip_texture, text_in, text_x, text_y;
-	    this.index = 0;
-	    if (this.scripts.length > 0) {
-	      current_script = this.scripts[this.index];
-	      this.screen = this.add.button(0, 0, (ref = current_script.image) != null ? ref.name : void 0, (function(_this) {
-	        return function() {
-	          return _this.next_dialog();
-	        };
-	      })(this));
-	      this.screen.alpha = 0;
-	      this.screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600);
-	      screen_in = this.add.tween(this.screen).to({
-	        alpha: 1
-	      }, 500).start();
-	      this.screen_fade = this.add.tween(this.screen).to({
-	        alpha: 0
-	      }, 500).chain(screen_in);
-	      this.screen_fade.onComplete.add(function() {
-	        if (this.index < this.scripts.length) {
-	          return this.screen.loadTexture(this.scripts[this.index].image.name);
-	        }
-	      }, this);
-	      text_x = ((ref1 = current_script.description) != null ? ref1.x : void 0) || this.world.centerX;
-	      text_y = ((ref2 = current_script.description) != null ? ref2.y : void 0) || this.world.centerY;
-	      this.text = this.add.text(text_x, text_y, (ref3 = current_script.description) != null ? ref3.text : void 0, {
-	        fontSize: '36pt',
-	        fill: '#fff'
-	      });
-	      this.text.anchor.setTo(0.5, 0.5);
-	      this.text.alpha = 0;
-	      text_in = this.add.tween(this.text).to({
-	        alpha: 1
-	      }, 500).start();
-	      this.text_fade = this.add.tween(this.text).to({
-	        alpha: 0
-	      }, 500).chain(text_in);
-	      this.text_fade.onComplete.add(function() {
-	        var script;
-	        script = this.scripts[this.index];
-	        if (script.description) {
-	          this.text.text = script.description.text;
-	          this.text.x = script.description.x || this.text.x;
-	          return this.text.y = script.description.y || this.text.y;
-	        } else {
-	          return this.text.text = '';
-	        }
-	      }, this);
-	      skip_text = this.make.text(0, 0, 'Skip >', {
-	        fontSize: '16pt',
-	        fill: '#fff'
-	      });
-	      skip_texture = this.add.renderTexture(skip_text.width, skip_text.height);
-	      skip_texture.render(skip_text);
-	      skip_btn = this.add.button(this.world.width, this.world.height, null, (function(_this) {
-	        return function() {
-	          return _this.next_scene();
-	        };
-	      })(this));
-	      skip_btn.anchor.setTo(1.5, 1.5);
-	      skip_btn.loadTexture(skip_texture);
-	      return this.add.tween(skip_btn).to({
-	        alpha: 0
-	      }, 1000, 'Linear', true, 0, -1, true);
-	    } else {
-	      return this.state.start(this.next_state);
-	    }
-	  };
-
-	  NarratorState.prototype.update = function() {
-	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
-	      return this.next_dialog();
-	    }
-	  };
-
-	  return NarratorState;
-
-	})();
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	var WelcomeState;
-
-	module.exports = WelcomeState = (function() {
-	  WelcomeState.prototype.name = 'welcome';
-
-	  function WelcomeState(arg) {
-	    this.next_state = arg.next_state;
-	  }
-
-	  WelcomeState.prototype.preload = function() {
-	    this.load.spritesheet('start-btn', 'assets/start-btn.png', 120, 35);
-	    this.load.spritesheet('about-btn', 'assets/about-btn.png', 120, 35);
-	    this.load.image('about-board', 'assets/about-board.png');
-	    return this.load.image('welcome-background', 'assets/welcome-bg.png');
-	  };
-
-	  WelcomeState.prototype.create = function() {
-	    var about_board, about_btn, bg, start_btn;
-	    bg = this.add.sprite(0, 0, 'welcome-background');
-	    this.add.tween(bg).from({
-	      alpha: 0
-	    }).start();
-	    start_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'start-btn', function() {
-	      return this.state.start(this.next_state);
-	    }, this, 1, 0);
-	    start_btn.anchor.setTo(0.5, 0.5);
-	    start_btn.alpha = 0;
-	    this.add.tween(start_btn).to({
-	      alpha: 1
-	    }).start();
-	    about_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'about-btn', function() {
-	      return this.add.tween(about_board).to({
-	        y: this.world.centerY
-	      }, 1000, Phaser.Easing.Bounce.Out).start();
-	    }, this, 1, 0);
-	    about_btn.anchor.setTo(0.5, 0.5);
-	    this.add.tween(about_btn).from({
-	      alpha: 0
-	    }).start();
-	    about_board = this.add.button(this.world.centerX, -1000, 'about-board', function() {
-	      return this.add.tween(about_board).to({
-	        y: -1000
-	      }, 1000, Phaser.Easing.Bounce.Out).start();
-	    }, this);
-	    return about_board.anchor.setTo(0.5, 0.5);
-	  };
-
-	  return WelcomeState;
-
-	})();
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports) {
-
-	var EndState;
-
-	module.exports = EndState = (function() {
-	  function EndState(arg) {
-	    this.description = arg.description, this.menu_state = arg.menu_state;
-	  }
-
-	  EndState.prototype.init = function(character) {
-	    this.character = character;
-	  };
-
-	  EndState.prototype.preload = function() {
-	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
-	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
-	  };
-
-	  EndState.prototype.create = function() {
-	    var menu_btn, text_x, text_y;
-	    this.overlay = this.add.graphics(0, 0);
-	    this.overlay.beginFill('#000', 1);
-	    this.overlay.drawRect(0, 0, 800, 600);
-	    this.overlay.endFill();
-	    this.overlay.alpha = 0.7;
-	    this.add.tween(this.overlay).from({
-	      alpha: 0
-	    }).start();
-	    text_x = this.world.centerX;
-	    text_y = this.world.centerY;
-	    this.text = this.add.text(text_x, text_y, this.description, {
-	      fontSize: '32px',
-	      fill: '#fff'
-	    });
-	    this.text.anchor.setTo(0.5, 0.5);
-	    this.add.tween(this.text).from({
-	      alpha: 0
-	    }).start();
-	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'menu-btn', (function(_this) {
-	      return function() {
-	        return _this.state.start(_this.menu_state);
-	      };
-	    })(this), this, 1, 0);
-	    menu_btn.anchor.setTo(0.5, 0.5);
-	    this.add.tween(menu_btn).from({
-	      alpha: 0
-	    }).start();
-	    return this.add.tween(menu_btn.scale).from({
-	      x: 2,
-	      y: 2
-	    }, 1000, Phaser.Easing.Bounce.Out).start();
-	  };
-
-	  EndState.prototype.update = function() {
-	    var platforms, player, ref, roadlights, stars, weapon;
-	    if (this.character) {
-	      ref = this.character, player = ref.player, weapon = ref.weapon, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
-	      this.physics.arcade.collide(player, platforms);
-	      this.physics.arcade.collide(stars, platforms);
-	      return this.physics.arcade.collide(stars, roadlights);
-	    }
-	  };
-
-	  return EndState;
-
-	})();
-
-
-/***/ },
-/* 9 */,
-/* 10 */
+/* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Player, Star, StarEscapeState;
@@ -948,8 +464,9 @@
 	          return _this.state.start(_this.over_state, true, false, _this.character);
 	        };
 	      })(this));
-	      return this.gameover = true;
-	    } else if (player.x > this.world.width) {
+	      this.gameover = true;
+	    }
+	    if (player.x >= this.world.width - player.width) {
 	      this.world.addChild(this.overlay);
 	      this.add.tween(this.overlay).from({
 	        alpha: 0
@@ -978,8 +495,348 @@
 
 
 /***/ },
-/* 11 */,
-/* 12 */
+/* 2 */
+/***/ function(module, exports) {
+
+	var Player;
+
+	module.exports = Player = (function() {
+	  function Player(game) {
+	    this.game = game;
+	    this.sprite = this.game.add.sprite(32, this.game.world.height - 150, 'dude', 0);
+	    this.game.physics.arcade.enable(this.sprite);
+	    this.sprite.body.bounce.y = 0.2;
+	    this.sprite.body.gravity.y = 800;
+	    this.sprite.body.collideWorldBounds = true;
+	    this.sprite.animations.add('left', [0, 1, 2, 3], 10, true);
+	    this.sprite.animations.add('right', [5, 6, 7, 8], 10, true);
+	    this.sprite.animations.add('common-attack-left', [0, 1, 2, 3], 10, true);
+	    this.sprite.animations.add('common-attack-right', [5, 6, 7, 8], 10, true);
+	    this.sprite.agent = this;
+	    this.reset();
+	  }
+
+	  Player.prototype.reset = function() {
+	    this.props = {
+	      hp: 10,
+	      mp: 20,
+	      sp: 10,
+	      ht: 400,
+	      at: 10
+	    };
+	    this.state = {
+	      sp: -1,
+	      mp: this.props.mp
+	    };
+	    this.sprite.x = 32;
+	    this.sprite.y = this.game.world.height - 150;
+	    this.sprite.angle = 0;
+	    return this.sprite.anchor.setTo(0.5, 1);
+	  };
+
+	  Player.prototype.update = function() {
+	    this.state.sp = (this.state.sp + 1) % this.props.sp;
+	    if (this.state.mp < this.props.mp) {
+	      return this.state.mp = (this.state.mp + 1) % (this.props.mp + 1);
+	    }
+	  };
+
+	  Player.prototype.walkLeft = function() {
+	    this.sprite.animations.play('left');
+	    return this.sprite.body.velocity.x = -150;
+	  };
+
+	  Player.prototype.walkRight = function() {
+	    this.sprite.animations.play('right');
+	    return this.sprite.body.velocity.x = 150;
+	  };
+
+	  Player.prototype.jump = function() {
+	    if (this.sprite.body.touching.down) {
+	      return this.sprite.body.velocity.y = -this.props.ht;
+	    }
+	  };
+
+	  Player.prototype.still = function() {
+	    this.sprite.animations.stop();
+	    if (this.sprite.deltaX > 0) {
+	      return this.sprite.frame = 5;
+	    } else if (this.sprite.deltaX < 0) {
+	      return this.sprite.frame = 0;
+	    }
+	  };
+
+	  Player.prototype.stop = function() {
+	    return this.sprite.body.velocity.x = 0;
+	  };
+
+	  Player.prototype.chop = function() {};
+
+	  Player.prototype.cutoff = function() {
+	    if (this.state.mp - 10 > 0) {
+	      this.sprite.animations.play('chop-left');
+	      return this.state.mp -= 10;
+	    }
+	  };
+
+	  Player.prototype.fight = function(Star) {
+	    var msg, msg_x, msg_y;
+	    if ((Star != null) && (Star.sprite != null)) {
+	      if (Star.sprite.x > this.sprite.x) {
+	        this.sprite.animations.play('common-attack-right');
+	      } else {
+	        this.sprite.animations.play('common-attack-left');
+	      }
+	      if (this.state.sp % this.props.sp === 0) {
+	        Star.props.hp -= this.props.at;
+	        msg_x = (this.sprite.x + Star.sprite.x) / 2;
+	        msg_y = this.sprite.y - 10;
+	        msg = this.game.add.text(msg_x, msg_y, -this.props.at, {
+	          fontSize: '12px',
+	          fill: '#fc0'
+	        });
+	        return this.game.add.tween(msg).to({
+	          y: msg.y - 100,
+	          alpha: 0
+	        }, 1000, 'Linear', true).onComplete.add(msg.kill, msg);
+	      }
+	    }
+	  };
+
+	  Player.prototype.kill = function(cb) {
+	    this.stop();
+	    this.still();
+	    this.sprite.anchor.setTo(0.5, 1);
+	    if (this.sprite.frame > 4) {
+	      this.game.add.tween(this.sprite).to({
+	        angle: -90
+	      }, 200, Phaser.Easing.Bounce.Out, true);
+	    } else {
+	      this.game.add.tween(this.sprite).to({
+	        angle: 90
+	      }, 200, Phaser.Easing.Bounce.Out, true);
+	    }
+	    if (cb) {
+	      return setTimeout(cb, 1000);
+	    }
+	  };
+
+	  return Player;
+
+	})();
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	var Star;
+
+	module.exports = Star = (function() {
+	  function Star(game, group, x, y, scale) {
+	    this.game = game;
+	    this.group = group;
+	    if (scale == null) {
+	      scale = 1;
+	    }
+	    this.sprite = this.group.create(x, y, 'star', 0);
+	    this.sprite.anchor.setTo(0.5, 0.5);
+	    this.sprite.scale.setTo(scale);
+	    this.game.add.tween(this.sprite).to({
+	      alpha: 0
+	    }, 500 + Math.random() * 500, 'Linear', true, Math.random() * 1000, -1, true);
+	    this.sprite.body.allowGravity = false;
+	    this.sprite.body.gravity.y = 300 * scale;
+	    this.sprite.body.bounce.y = 0.7 + Math.random() * 0.2;
+	    this.sprite.animations.add('fight', [1, 2], 5, true);
+	    this.sprite.agent = this;
+	    this.props = {
+	      hp: 100,
+	      sp: 5
+	    };
+	    this.state = {
+	      sp: -1
+	    };
+	  }
+
+	  Star.prototype.update = function() {
+	    return this.state.sp = (this.state.sp + 1) % this.props.sp;
+	  };
+
+	  Star.prototype.fight = function(player) {
+	    var msg, msg_x, msg_y, spark, spark_x, spark_y;
+	    if (player) {
+	      this.sprite.animations.play('fight');
+	      setTimeout((function(_this) {
+	        return function() {
+	          if (_this.props.hp > 0) {
+	            _this.sprite.animations.stop();
+	            return _this.sprite.frame = 0;
+	          } else {
+	            return _this.kill();
+	          }
+	        };
+	      })(this), 300);
+	      if (this.state.sp % this.props.sp === 0) {
+	        player.props.hp -= 1;
+	        spark_x = this.sprite.x + (player.sprite.x - this.sprite.x) * 0.5 + Math.random() * 10;
+	        spark_y = this.sprite.y + Math.random() * 10;
+	        spark = this.game.add.sprite(spark_x, spark_y, 'star', 0);
+	        spark.animations.add('spark', [1, 2], 10, true);
+	        spark.animations.play('spark');
+	        spark.scale.setTo(0.5, 0.5);
+	        this.game.add.tween(spark).to({
+	          alpha: 0
+	        }, 1000, 'Linear', true).onComplete.add(spark.kill, spark);
+	        msg_x = (this.sprite.x + player.sprite.x) / 2;
+	        msg_y = this.sprite.y - 10;
+	        msg = this.game.add.text(msg_x, msg_y, '-1', {
+	          fontSize: '12px',
+	          fill: '#f00'
+	        });
+	        return this.game.add.tween(msg).to({
+	          y: msg.y - 100,
+	          alpha: 0
+	        }, 1000, 'Linear', true).onComplete.add(msg.kill, msg);
+	      }
+	    }
+	  };
+
+	  Star.prototype.kill = function() {
+	    return this.sprite.kill();
+	  };
+
+	  return Star;
+
+	})();
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	var WelcomeState;
+
+	module.exports = WelcomeState = (function() {
+	  function WelcomeState(arg) {
+	    this.next_state = arg.next_state;
+	  }
+
+	  WelcomeState.prototype.preload = function() {
+	    this.load.spritesheet('start-btn', 'assets/start-btn.png', 120, 35);
+	    this.load.spritesheet('about-btn', 'assets/about-btn.png', 120, 35);
+	    this.load.image('about-board', 'assets/about-board.png');
+	    return this.load.image('welcome-background', 'assets/welcome-bg.png');
+	  };
+
+	  WelcomeState.prototype.create = function() {
+	    var about_board, about_btn, bg, start_btn;
+	    bg = this.add.sprite(0, 0, 'welcome-background');
+	    this.add.tween(bg).from({
+	      alpha: 0
+	    }).start();
+	    start_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'start-btn', function() {
+	      return this.state.start(this.next_state);
+	    }, this, 1, 0);
+	    start_btn.anchor.setTo(0.5, 0.5);
+	    start_btn.alpha = 0;
+	    this.add.tween(start_btn).to({
+	      alpha: 1
+	    }).start();
+	    about_btn = this.add.button(this.world.centerX, this.world.centerY + 160, 'about-btn', function() {
+	      return this.add.tween(about_board).to({
+	        y: this.world.centerY
+	      }, 1000, Phaser.Easing.Bounce.Out).start();
+	    }, this, 1, 0);
+	    about_btn.anchor.setTo(0.5, 0.5);
+	    this.add.tween(about_btn).from({
+	      alpha: 0
+	    }).start();
+	    about_board = this.add.button(this.world.centerX, -1000, 'about-board', function() {
+	      return this.add.tween(about_board).to({
+	        y: -1000
+	      }, 1000, Phaser.Easing.Bounce.Out).start();
+	    }, this);
+	    return about_board.anchor.setTo(0.5, 0.5);
+	  };
+
+	  return WelcomeState;
+
+	})();
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	var EndState;
+
+	module.exports = EndState = (function() {
+	  function EndState(arg) {
+	    this.description = arg.description, this.menu_state = arg.menu_state;
+	  }
+
+	  EndState.prototype.init = function(character) {
+	    this.character = character;
+	  };
+
+	  EndState.prototype.preload = function() {
+	    this.load.spritesheet('restart-btn', 'assets/restart-btn.png', 120, 35);
+	    return this.load.spritesheet('menu-btn', 'assets/menu-btn.png', 120, 35);
+	  };
+
+	  EndState.prototype.create = function() {
+	    var menu_btn, text_x, text_y;
+	    this.overlay = this.add.graphics(0, 0);
+	    this.overlay.beginFill('#000', 1);
+	    this.overlay.drawRect(0, 0, 800, 600);
+	    this.overlay.endFill();
+	    this.overlay.alpha = 0.7;
+	    this.add.tween(this.overlay).from({
+	      alpha: 0
+	    }).start();
+	    text_x = this.world.centerX;
+	    text_y = this.world.centerY;
+	    this.text = this.add.text(text_x, text_y, this.description, {
+	      fontSize: '32pt',
+	      fill: '#fff'
+	    });
+	    this.text.anchor.setTo(0.5, 0.5);
+	    this.add.tween(this.text).from({
+	      alpha: 0
+	    }).start();
+	    menu_btn = this.add.button(this.world.centerX, this.world.centerY + 100, 'menu-btn', (function(_this) {
+	      return function() {
+	        return _this.state.start(_this.menu_state);
+	      };
+	    })(this), this, 1, 0);
+	    menu_btn.anchor.setTo(0.5, 0.5);
+	    this.add.tween(menu_btn).from({
+	      alpha: 0
+	    }).start();
+	    return this.add.tween(menu_btn.scale).from({
+	      x: 2,
+	      y: 2
+	    }, 1000, Phaser.Easing.Bounce.Out).start();
+	  };
+
+	  EndState.prototype.update = function() {
+	    var platforms, player, ref, roadlights, stars, weapon;
+	    if (this.character) {
+	      ref = this.character, player = ref.player, weapon = ref.weapon, stars = ref.stars, platforms = ref.platforms, roadlights = ref.roadlights;
+	      this.physics.arcade.collide(player, platforms);
+	      this.physics.arcade.collide(stars, platforms);
+	      return this.physics.arcade.collide(stars, roadlights);
+	    }
+	  };
+
+	  return EndState;
+
+	})();
+
+
+/***/ },
+/* 6 */
 /***/ function(module, exports) {
 
 	var TempState;
@@ -1009,7 +866,7 @@
 	    text_x = this.world.centerX;
 	    text_y = this.world.centerY;
 	    this.text = this.add.text(text_x, text_y, this.description, {
-	      fontSize: '32px',
+	      fontSize: '36pt',
 	      fill: '#fff'
 	    });
 	    this.text.anchor.setTo(0.5, 0.5);
@@ -1055,6 +912,143 @@
 	  };
 
 	  return TempState;
+
+	})();
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	var NarratorState;
+
+	module.exports = NarratorState = (function() {
+	  NarratorState.prototype.name = 'narrator';
+
+	  function NarratorState(arg) {
+	    this.scripts = arg.scripts, this.next_state = arg.next_state;
+	  }
+
+	  NarratorState.prototype.next_scene = function() {
+	    this.add.tween(this.screen).to({
+	      alpha: 0
+	    }, 500).start().onComplete.add((function(_this) {
+	      return function() {
+	        return _this.state.start(_this.next_state);
+	      };
+	    })(this));
+	    return this.add.tween(this.text).to({
+	      alpha: 0
+	    }, 500).start();
+	  };
+
+	  NarratorState.prototype.preload = function() {
+	    var i, len, ref, results, script;
+	    ref = this.scripts;
+	    results = [];
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      script = ref[i];
+	      if (script.image) {
+	        results.push(this.load.image(script.image.name, script.image.url));
+	      } else {
+	        results.push(void 0);
+	      }
+	    }
+	    return results;
+	  };
+
+	  NarratorState.prototype.next_dialog = function() {
+	    var script;
+	    if (!this.text_fade.isRunning) {
+	      this.index += 1;
+	      if (this.index < this.scripts.length) {
+	        script = this.scripts[this.index];
+	        if (script.image) {
+	          this.screen_fade.start();
+	        }
+	        return this.text_fade.start();
+	      } else {
+	        return this.next_scene();
+	      }
+	    }
+	  };
+
+	  NarratorState.prototype.create = function() {
+	    var current_script, ref, ref1, ref2, ref3, screen_in, skip_btn, skip_text, skip_texture, text_in, text_x, text_y;
+	    this.index = 0;
+	    if (this.scripts.length > 0) {
+	      current_script = this.scripts[this.index];
+	      this.screen = this.add.button(0, 0, (ref = current_script.image) != null ? ref.name : void 0, (function(_this) {
+	        return function() {
+	          return _this.next_dialog();
+	        };
+	      })(this));
+	      this.screen.alpha = 0;
+	      this.screen.hitArea = new PIXI.Rectangle(0, 0, 800, 600);
+	      screen_in = this.add.tween(this.screen).to({
+	        alpha: 1
+	      }, 500).start();
+	      this.screen_fade = this.add.tween(this.screen).to({
+	        alpha: 0
+	      }, 500).chain(screen_in);
+	      this.screen_fade.onComplete.add(function() {
+	        if (this.index < this.scripts.length) {
+	          return this.screen.loadTexture(this.scripts[this.index].image.name);
+	        }
+	      }, this);
+	      text_x = ((ref1 = current_script.description) != null ? ref1.x : void 0) || this.world.centerX;
+	      text_y = ((ref2 = current_script.description) != null ? ref2.y : void 0) || this.world.centerY;
+	      this.text = this.add.text(text_x, text_y, (ref3 = current_script.description) != null ? ref3.text : void 0, {
+	        fontSize: '36pt',
+	        fill: '#fff'
+	      });
+	      this.text.anchor.setTo(0.5, 0.5);
+	      this.text.alpha = 0;
+	      text_in = this.add.tween(this.text).to({
+	        alpha: 1
+	      }, 500).start();
+	      this.text_fade = this.add.tween(this.text).to({
+	        alpha: 0
+	      }, 500).chain(text_in);
+	      this.text_fade.onComplete.add(function() {
+	        var script;
+	        script = this.scripts[this.index];
+	        if (script.description) {
+	          this.text.text = script.description.text;
+	          this.text.x = script.description.x || this.text.x;
+	          return this.text.y = script.description.y || this.text.y;
+	        } else {
+	          return this.text.text = '';
+	        }
+	      }, this);
+	      skip_text = this.make.text(0, 0, 'Skip >', {
+	        fontSize: '16pt',
+	        fill: '#fff'
+	      });
+	      skip_texture = this.add.renderTexture(skip_text.width, skip_text.height);
+	      skip_texture.render(skip_text);
+	      skip_btn = this.add.button(this.world.width, this.world.height, null, (function(_this) {
+	        return function() {
+	          return _this.next_scene();
+	        };
+	      })(this));
+	      skip_btn.anchor.setTo(1.5, 1.5);
+	      skip_btn.loadTexture(skip_texture);
+	      return this.add.tween(skip_btn).to({
+	        alpha: 0
+	      }, 1000, 'Linear', true, 0, -1, true);
+	    } else {
+	      return this.state.start(this.next_state);
+	    }
+	  };
+
+	  NarratorState.prototype.update = function() {
+	    if (this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR)) {
+	      return this.next_dialog();
+	    }
+	  };
+
+	  return NarratorState;
 
 	})();
 

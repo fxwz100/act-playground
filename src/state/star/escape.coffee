@@ -182,7 +182,7 @@ module.exports = class StarEscapeState
 
       @gameover = yes
 
-    else if player.x > @world.width
+    if player.x >= @world.width - player.width
       @world.addChild @overlay
 
       @add.tween @overlay
