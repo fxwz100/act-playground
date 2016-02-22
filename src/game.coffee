@@ -76,9 +76,8 @@ game.state.add 'star-2', new Narrator
   scripts:[
     {
       description:
-        text: '不能碰到星星？'
+        text: '过去了？'
     }
-    {description: text: '但下一步是什么呢？'}
     {
       description:
         text: '这是什么意思？'
@@ -87,6 +86,7 @@ game.state.add 'star-2', new Narrator
         name: 'welcome-bg'
         url: 'assets/welcome-bg.png'
     }
+    {description: text: '（然后？）'}
   ]
   next_state: 'end'
 
