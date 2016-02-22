@@ -48,13 +48,13 @@
 
 	StarEscapeState = __webpack_require__(1);
 
-	WelcomeState = __webpack_require__(4);
+	WelcomeState = __webpack_require__(5);
 
-	EndState = __webpack_require__(5);
+	EndState = __webpack_require__(6);
 
-	TempState = __webpack_require__(6);
+	TempState = __webpack_require__(7);
 
-	Narrator = __webpack_require__(7);
+	Narrator = __webpack_require__(8);
 
 	game = new Phaser.Game(800, 600, Phaser.AUTO, 'action');
 
@@ -200,20 +200,11 @@
 	  scripts: [
 	    {
 	      description: {
-	        text: '不能碰到星星？'
+	        text: '过去了？'
 	      }
 	    }, {
 	      description: {
-	        text: '但下一步是什么呢？'
-	      }
-	    }, {
-	      description: {
-	        text: '这是什么意思？',
-	        y: 450
-	      },
-	      image: {
-	        name: 'welcome-bg',
-	        url: 'assets/welcome-bg.png'
+	        text: '好像没那么简单'
 	      }
 	    }
 	  ],
@@ -235,11 +226,13 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Player, Star, StarEscapeState;
+	var Player, Roadlight, Star, StarEscapeState;
 
 	Player = __webpack_require__(2);
 
 	Star = __webpack_require__(3);
+
+	Roadlight = __webpack_require__(4);
 
 	module.exports = StarEscapeState = (function() {
 	  StarEscapeState.prototype.playerStatus = {
@@ -257,8 +250,6 @@
 	    }
 	  };
 
-	  StarEscapeState.prototype.cursors = null;
-
 	  function StarEscapeState(arg) {
 	    this.over_state = arg.over_state, this.pass_state = arg.pass_state;
 	  }
@@ -273,7 +264,8 @@
 	    this.load.spritesheet('star', 'assets/stars.png', 24, 22);
 	    this.load.spritesheet('dude', 'assets/dude.png', 32, 48);
 	    this.load.spritesheet('diamond', 'assets/weapon.png', 64, 64);
-	    this.load.image('road-light', 'assets/road-light.png');
+	    this.load.image('roadlight', 'assets/road-light.png');
+	    this.load.image('roadlight-light', 'assets/roadlight-light.png');
 	    if (!this.game.device.desktop) {
 	      this.load.image('right', 'assets/right.png');
 	      this.load.image('left', 'assets/left.png');
@@ -296,9 +288,7 @@
 	    for (i = j = 0; j <= 2; i = ++j) {
 	      roadlight_x = 100 + i * 300;
 	      roadlight_y = this.world.height - 64;
-	      roadlight = roadlights.create(roadlight_x, roadlight_y, 'road-light');
-	      roadlight.anchor.setTo(0.5, 1);
-	      roadlight.body.immovable = true;
+	      roadlight = new Roadlight(this, roadlights, roadlight_x, roadlight_y);
 	    }
 	    player = new Player(this);
 	    this.character.player = player.sprite;
@@ -316,81 +306,8 @@
 	      right: false,
 	      up: false
 	    };
-	    if (this.game.device.desktop) {
-	      this.cursors = this.input.keyboard.createCursorKeys();
-	    } else {
-	      this.jump_btn = this.add.sprite(10, this.world.height - 30, 'up');
-	      this.jump_btn.alpha = 0.5;
-	      this.jump_btn.anchor.setTo(0, 1);
-	      this.jump_btn.inputEnabled = true;
-	      this.jump_btn.events.onInputOver.add((function(_this) {
-	        return function() {
-	          return _this.control.up = true;
-	        };
-	      })(this));
-	      this.jump_btn.events.onInputDown.add((function(_this) {
-	        return function() {
-	          return _this.control.up = true;
-	        };
-	      })(this));
-	      this.jump_btn.events.onInputOut.add((function(_this) {
-	        return function() {
-	          return _this.control.up = false;
-	        };
-	      })(this));
-	      this.jump_btn.events.onInputUp.add((function(_this) {
-	        return function() {
-	          return _this.control.up = false;
-	        };
-	      })(this));
-	      this.left_btn = this.add.sprite(this.world.width - 110, this.world.height - 30, 'left');
-	      this.left_btn.alpha = 0.5;
-	      this.left_btn.anchor.setTo(1, 1);
-	      this.left_btn.inputEnabled = true;
-	      this.left_btn.events.onInputOver.add((function(_this) {
-	        return function() {
-	          return _this.control.left = true;
-	        };
-	      })(this));
-	      this.left_btn.events.onInputDown.add((function(_this) {
-	        return function() {
-	          return _this.control.left = true;
-	        };
-	      })(this));
-	      this.left_btn.events.onInputOut.add((function(_this) {
-	        return function() {
-	          return _this.control.left = false;
-	        };
-	      })(this));
-	      this.left_btn.events.onInputUp.add((function(_this) {
-	        return function() {
-	          return _this.control.left = false;
-	        };
-	      })(this));
-	      this.right_btn = this.add.sprite(this.world.width - 30, this.world.height - 30, 'right');
-	      this.right_btn.alpha = 0.5;
-	      this.right_btn.anchor.setTo(1, 1);
-	      this.right_btn.inputEnabled = true;
-	      this.right_btn.events.onInputOver.add((function(_this) {
-	        return function() {
-	          return _this.control.right = true;
-	        };
-	      })(this));
-	      this.right_btn.events.onInputDown.add((function(_this) {
-	        return function() {
-	          return _this.control.right = true;
-	        };
-	      })(this));
-	      this.right_btn.events.onInputOut.add((function(_this) {
-	        return function() {
-	          return _this.control.right = false;
-	        };
-	      })(this));
-	      this.right_btn.events.onInputUp.add((function(_this) {
-	        return function() {
-	          return _this.control.right = false;
-	        };
-	      })(this));
+	    if (!this.game.device.desktop) {
+	      this._setupMobileInputs();
 	    }
 	    this.overlay = this.make.graphics(0, 0);
 	    this.overlay.beginFill('#000', 1);
@@ -400,10 +317,85 @@
 	    return this.gameover = false;
 	  };
 
+	  StarEscapeState.prototype._setupMobileInputs = function() {
+	    this.jump_btn = this.add.sprite(10, this.world.height - 30, 'up');
+	    this.jump_btn.alpha = 0.5;
+	    this.jump_btn.anchor.setTo(0, 1);
+	    this.jump_btn.inputEnabled = true;
+	    this.jump_btn.events.onInputOver.add((function(_this) {
+	      return function() {
+	        return _this.control.up = true;
+	      };
+	    })(this));
+	    this.jump_btn.events.onInputDown.add((function(_this) {
+	      return function() {
+	        return _this.control.up = true;
+	      };
+	    })(this));
+	    this.jump_btn.events.onInputOut.add((function(_this) {
+	      return function() {
+	        return _this.control.up = false;
+	      };
+	    })(this));
+	    this.jump_btn.events.onInputUp.add((function(_this) {
+	      return function() {
+	        return _this.control.up = false;
+	      };
+	    })(this));
+	    this.left_btn = this.add.sprite(this.world.width - 110, this.world.height - 30, 'left');
+	    this.left_btn.alpha = 0.5;
+	    this.left_btn.anchor.setTo(1, 1);
+	    this.left_btn.inputEnabled = true;
+	    this.left_btn.events.onInputOver.add((function(_this) {
+	      return function() {
+	        return _this.control.left = true;
+	      };
+	    })(this));
+	    this.left_btn.events.onInputDown.add((function(_this) {
+	      return function() {
+	        return _this.control.left = true;
+	      };
+	    })(this));
+	    this.left_btn.events.onInputOut.add((function(_this) {
+	      return function() {
+	        return _this.control.left = false;
+	      };
+	    })(this));
+	    this.left_btn.events.onInputUp.add((function(_this) {
+	      return function() {
+	        return _this.control.left = false;
+	      };
+	    })(this));
+	    this.right_btn = this.add.sprite(this.world.width - 30, this.world.height - 30, 'right');
+	    this.right_btn.alpha = 0.5;
+	    this.right_btn.anchor.setTo(1, 1);
+	    this.right_btn.inputEnabled = true;
+	    this.right_btn.events.onInputOver.add((function(_this) {
+	      return function() {
+	        return _this.control.right = true;
+	      };
+	    })(this));
+	    this.right_btn.events.onInputDown.add((function(_this) {
+	      return function() {
+	        return _this.control.right = true;
+	      };
+	    })(this));
+	    this.right_btn.events.onInputOut.add((function(_this) {
+	      return function() {
+	        return _this.control.right = false;
+	      };
+	    })(this));
+	    return this.right_btn.events.onInputUp.add((function(_this) {
+	      return function() {
+	        return _this.control.right = false;
+	      };
+	    })(this));
+	  };
+
 	  StarEscapeState.prototype._processInputs = function() {
 	    if (this.game.device.desktop) {
-	      this.control.left = this.cursors.left.isDown;
-	      this.control.right = this.cursors.right.isDown;
+	      this.control.left = this.input.keyboard.isDown(Phaser.KeyCode.LEFT);
+	      this.control.right = this.input.keyboard.isDown(Phaser.KeyCode.RIGHT);
 	      return this.control.up = this.input.keyboard.isDown(Phaser.KeyCode.SPACEBAR);
 	    }
 	  };
@@ -422,11 +414,22 @@
 	      star.agent.fight(player.agent);
 	      return player.agent.fight(star.agent);
 	    }, null, this);
-	    lighted = this.game.physics.arcade.overlap(player, roadlights);
+	    lighted = this.game.physics.arcade.overlap(player, roadlights, function(player, light) {
+	      return light.agent.forceLighted(true);
+	    });
 	    ref1 = stars.children;
 	    for (j = 0, len = ref1.length; j < len; j++) {
 	      star = ref1[j];
-	      if (!(star.body.allowGravity = !lighted)) {
+	      if (star.x > player.x - 100) {
+	        if (!(star.body.allowGravity = !lighted)) {
+	          star.body.velocity = {
+	            x: 0,
+	            y: 0
+	          };
+	          star.agent.backToPlace();
+	        }
+	      } else {
+	        star.body.allowGravity = false;
 	        star.body.velocity = {
 	          x: 0,
 	          y: 0
@@ -636,17 +639,19 @@
 	  function Star(game, group, x, y, scale) {
 	    this.game = game;
 	    this.group = group;
+	    this.x = x;
+	    this.y = y;
 	    if (scale == null) {
 	      scale = 1;
 	    }
-	    this.sprite = this.group.create(x, y, 'star', 0);
+	    this.sprite = this.group.create(this.x, this.y, 'star', 0);
 	    this.sprite.anchor.setTo(0.5, 0.5);
 	    this.sprite.scale.setTo(scale);
 	    this.game.add.tween(this.sprite).to({
 	      alpha: 0
 	    }, 500 + Math.random() * 500, 'Linear', true, Math.random() * 1000, -1, true);
 	    this.sprite.body.allowGravity = false;
-	    this.sprite.body.gravity.y = 300 * scale;
+	    this.sprite.body.gravity.y = 500 * scale;
 	    this.sprite.body.bounce.y = 0.7 + Math.random() * 0.2;
 	    this.sprite.animations.add('fight', [1, 2], 5, true);
 	    this.sprite.agent = this;
@@ -661,6 +666,13 @@
 
 	  Star.prototype.update = function() {
 	    return this.state.sp = (this.state.sp + 1) % this.props.sp;
+	  };
+
+	  Star.prototype.backToPlace = function() {
+	    if (!this.sprite.allowGravity) {
+	      this.sprite.x += this.x > this.sprite.x ? 1 : -1;
+	      return this.sprite.y += this.y > this.sprite.y ? 1 : -1;
+	    }
 	  };
 
 	  Star.prototype.fight = function(player) {
@@ -715,6 +727,52 @@
 /* 4 */
 /***/ function(module, exports) {
 
+	var Roadlight;
+
+	module.exports = Roadlight = (function() {
+	  function Roadlight(game, group, x, y, lighted) {
+	    this.game = game;
+	    this.group = group;
+	    if (lighted == null) {
+	      lighted = false;
+	    }
+	    this.sprite = this.group.create(x, y, 'roadlight');
+	    this.sprite.anchor.setTo(0.5, 1);
+	    this.sprite.body.immovable = true;
+	    this.sprite.agent = this;
+	    this.light = this.game.add.sprite(x, y - 120, 'roadlight-light');
+	    this.light.anchor.setTo(0.5, 0);
+	    this.light.alpha = lighted ? 1 : 0;
+	    this.light.agent = this;
+	  }
+
+	  Roadlight.prototype.toggle = function() {
+	    var ref;
+	    if ((ref = this.light.alpha) === 0 || ref === 1) {
+	      console.log(this.light.alpha);
+	      return this.game.add.tween(this.light).to({
+	        alpha: (this.light.alpha < 1 ? 1 : 0)
+	      }).start();
+	    }
+	  };
+
+	  Roadlight.prototype.forceLighted = function(lighted) {
+	    if ((lighted && this.light.alpha < 1) || (!lighted && this.light.alpha > 0)) {
+	      return this.game.add.tween(this.light).to({
+	        alpha: (lighted ? 1 : 0)
+	      }).start();
+	    }
+	  };
+
+	  return Roadlight;
+
+	})();
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
 	var WelcomeState;
 
 	module.exports = WelcomeState = (function() {
@@ -766,7 +824,7 @@
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	var EndState;
@@ -836,7 +894,7 @@
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	var TempState;
@@ -917,7 +975,7 @@
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports) {
 
 	var NarratorState;

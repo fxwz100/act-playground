@@ -2,8 +2,8 @@ module.exports = class Star
 
   # - loading -------------------------
 
-  constructor: (@game, @group, x, y, scale=1) ->
-    @sprite = @group.create x, y, 'star', 0
+  constructor: (@game, @group, @x, @y, scale=1) ->
+    @sprite = @group.create @x, @y, 'star', 0
     @sprite.anchor.setTo 0.5, 0.5
     @sprite.scale.setTo scale
 
@@ -12,7 +12,7 @@ module.exports = class Star
 
     # physics
     @sprite.body.allowGravity = off
-    @sprite.body.gravity.y = 300 * scale
+    @sprite.body.gravity.y = 500 * scale
     @sprite.body.bounce.y = 0.7 + Math.random() * 0.2
 
     # animations
@@ -32,6 +32,11 @@ module.exports = class Star
 
   update: ->
     @state.sp = (@state.sp + 1) % @props.sp
+
+  backToPlace: ->
+    unless @sprite.allowGravity
+      @sprite.x += if @x > @sprite.x then 1 else -1
+      @sprite.y += if @y > @sprite.y then 1 else -1
 
   # - actions -------------------------
 

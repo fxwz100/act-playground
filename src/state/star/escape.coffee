@@ -1,5 +1,6 @@
 Player = require '../../agent/player'
 Star  = require '../../agent/star'
+Roadlight = require '../../agent/roadlight'
 
 
 module.exports = class StarEscapeState
@@ -24,7 +25,8 @@ module.exports = class StarEscapeState
     @load.spritesheet 'star', 'assets/stars.png', 24, 22
     @load.spritesheet 'dude', 'assets/dude.png', 32, 48
     @load.spritesheet 'diamond', 'assets/weapon.png', 64, 64
-    @load.image 'road-light', 'assets/road-light.png'
+    @load.image 'roadlight', 'assets/road-light.png'
+    @load.image 'roadlight-light', 'assets/roadlight-light.png'
 
     unless @game.device.desktop
       @load.image 'right', 'assets/right.png'
@@ -53,9 +55,11 @@ module.exports = class StarEscapeState
     for i in [0..2]
       roadlight_x = 100 + i * 300
       roadlight_y = @world.height - 64
-      roadlight = roadlights.create roadlight_x, roadlight_y, 'road-light'
-      roadlight.anchor.setTo 0.5, 1
-      roadlight.body.immovable = yes
+#      roadlight = roadlights.create roadlight_x, roadlight_y, 'road-light'
+#      roadlight.anchor.setTo 0.5, 1
+#      roadlight.body.immovable = yes
+      roadlight = new Roadlight @, roadlights, roadlight_x, roadlight_y
+
 
     # create the characters
 
@@ -141,10 +145,16 @@ module.exports = class StarEscapeState
       player.agent.fight star.agent
     , null, @
 
-    lighted = @game.physics.arcade.overlap player, roadlights
+    lighted = @game.physics.arcade.overlap player, roadlights, (player, light) ->
+      light.agent.forceLighted on
 
     for star in stars.children
-      unless star.body.allowGravity = not lighted
+      if star.x > player.x - 100
+        unless star.body.allowGravity = not lighted
+          star.body.velocity = x: 0, y: 0
+          star.agent.backToPlace()
+      else
+        star.body.allowGravity = no
         star.body.velocity = x: 0, y: 0
 
     @playerStatus.update player.agent
