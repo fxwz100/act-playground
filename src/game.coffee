@@ -74,19 +74,8 @@ game.state.add 'star-1', new Narrator
 
 game.state.add 'star-2', new Narrator
   scripts:[
-    {
-      description:
-        text: '过去了？'
-    }
-    {
-      description:
-        text: '这是什么意思？'
-        y: 450
-      image:
-        name: 'welcome-bg'
-        url: 'assets/welcome-bg.png'
-    }
-    {description: text: '（然后？）'}
+    {description: text: '过去了？'}
+    {description: text: '好像没那么简单'}
   ]
   next_state: 'end'
 
